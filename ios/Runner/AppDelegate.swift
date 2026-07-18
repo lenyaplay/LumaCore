@@ -5,6 +5,11 @@ import UIKit
 @objc class AppDelegate: FlutterAppDelegate {
   private let cameraController = CameraCaptureController()
   private let previewTexture = CameraPreviewTexture()
+  private let recordingController = RecordingController()
+
+  // Set once in handleStartCamera from the actually-delivered frame size —
+  // recording must encode at the same dimensions the camera is producing.
+  private var frameSize: CGSize?
 
   override func application(
     _ application: UIApplication,
@@ -17,8 +22,9 @@ import UIKit
     // (Keychain UUID). The render loop itself does not go through here —
     // dart:ffi + Obj-C++ bridge only.
     if let controller = window?.rootViewController as? FlutterViewController {
-      cameraController.onFrame = { [weak previewTexture] pixelBuffer in
+      cameraController.onFrame = { [weak previewTexture, weak recordingController] pixelBuffer, pts in
         previewTexture?.updateFrame(pixelBuffer)
+        recordingController?.submitFrame(pixelBuffer, pts: pts)
       }
 
       let channel = FlutterMethodChannel(name: "com.lumacore/native", binaryMessenger: controller.binaryMessenger)
@@ -33,6 +39,10 @@ import UIKit
         case "stopCamera":
           self.cameraController.stop()
           result(nil)
+        case "startRecording":
+          self.handleStartRecording(result: result)
+        case "stopRecording":
+          self.handleStopRecording(result: result)
         default:
           result(FlutterMethodNotImplemented)
         }

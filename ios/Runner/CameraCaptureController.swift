@@ -10,8 +10,10 @@ final class CameraCaptureController: NSObject {
     case configurationFailed
   }
 
-  /// Delivered on `captureQueue` — never the main thread.
-  var onFrame: ((CVPixelBuffer) -> Void)?
+  /// Delivered on `captureQueue` — never the main thread. The CMTime is the
+  /// camera's own hardware presentation timestamp (not wall-clock) — needed
+  /// as the recording PTS source, see RecordingController.
+  var onFrame: ((CVPixelBuffer, CMTime) -> Void)?
 
   private let session = AVCaptureSession()
   private let captureQueue = DispatchQueue(label: "com.lumacore.camera.capture")
@@ -82,6 +84,12 @@ final class CameraCaptureController: NSObject {
 
     let output = AVCaptureVideoDataOutput()
     output.alwaysDiscardsLateVideoFrames = true
+    // Pinned explicitly (not left to the AVFoundation default) so it maps
+    // 1:1 onto FFmpeg's AV_PIX_FMT_NV12 (full-range) in EncoderSession — see
+    // ai_plans/01-ios-ffmpeg-minimal-recording.md §4.
+    output.videoSettings = [
+      kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+    ]
     output.setSampleBufferDelegate(self, queue: captureQueue)
     guard session.canAddOutput(output) else {
       throw CaptureError.configurationFailed
@@ -116,6 +124,7 @@ extension CameraCaptureController: AVCaptureVideoDataOutputSampleBufferDelegate 
       completion(.success(size))
     }
 
-    onFrame?(pixelBuffer)
+    let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+    onFrame?(pixelBuffer, pts)
   }
 }

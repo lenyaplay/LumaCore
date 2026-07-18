@@ -39,6 +39,12 @@ int32_t lumacore_start_recording(int64_t session, const char* outPath, int bitra
   return it->second.encoder.start(outPath, bitrateKbps, w, h) ? 0 : -1;
 }
 
+void lumacore_submit_frame(int64_t session, void* pixelBuffer, int64_t ptsUs) {
+  auto it = g_sessions.find(session);
+  if (it == g_sessions.end() || !pixelBuffer) return;
+  it->second.encoder.submitFrame(pixelBuffer, ptsUs);
+}
+
 int32_t lumacore_stop_recording(int64_t session) {
   auto it = g_sessions.find(session);
   if (it == g_sessions.end()) return -1;

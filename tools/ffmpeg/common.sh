@@ -22,6 +22,14 @@ FFMPEG_COMMON_FLAGS=(
   --enable-encoder=aac
 )
 
+# iOS-specific flags (VideoToolbox hardware H.264 encode, write-path only —
+# decode/hwaccel intentionally not enabled, see ARCHITECTURE.md §4).
+FFMPEG_IOS_FLAGS=(
+  --enable-videotoolbox
+  --enable-encoder=h264_videotoolbox
+  --extra-ldflags="-framework VideoToolbox -framework CoreMedia -framework CoreVideo -framework CoreFoundation -framework AudioToolbox"
+)
+
 require_ffmpeg_src() {
   if [[ ! -f "${FFMPEG_SRC_DIR}/configure" ]]; then
     echo "error: FFmpeg source not found at ${FFMPEG_SRC_DIR}" >&2

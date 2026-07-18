@@ -38,6 +38,36 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
   )
   target_link_libraries(lumacore PRIVATE lumacore_logic)
   target_link_libraries(lumacore PRIVATE "-framework Metal" "-framework CoreVideo" "-framework Foundation")
+
+  # --- FFmpeg write-path statics (VideoToolbox H.264 encode, mp4 mux) --------
+  # Built by tools/ffmpeg/build_ios.sh into one slice dir per PLATFORM (set by
+  # native/cmake/ios.toolchain.cmake). See docs/ai_plans/01-ios-ffmpeg-minimal-recording.md.
+  if(PLATFORM STREQUAL "OS64")
+    set(LUMACORE_FFMPEG_IOS_SLICE "device-arm64")
+  elseif(PLATFORM STREQUAL "SIMULATORARM64")
+    set(LUMACORE_FFMPEG_IOS_SLICE "sim-arm64")
+  else()
+    message(FATAL_ERROR "Unsupported iOS PLATFORM '${PLATFORM}' — only OS64 (device) and SIMULATORARM64 (simulator) are built (arm64-only scope, see ai_plans/01-ios-ffmpeg-minimal-recording.md).")
+  endif()
+  set(LUMACORE_FFMPEG_IOS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/ffmpeg_build/ios/${LUMACORE_FFMPEG_IOS_SLICE}")
+  if(NOT EXISTS "${LUMACORE_FFMPEG_IOS_DIR}/lib/libavcodec.a")
+    message(FATAL_ERROR "FFmpeg iOS build not found at ${LUMACORE_FFMPEG_IOS_DIR} — run tools/ffmpeg/build_ios.sh first.")
+  endif()
+
+  target_include_directories(lumacore_logic PRIVATE "${LUMACORE_FFMPEG_IOS_DIR}/include")
+  target_link_libraries(lumacore_logic PRIVATE
+    "${LUMACORE_FFMPEG_IOS_DIR}/lib/libavformat.a"
+    "${LUMACORE_FFMPEG_IOS_DIR}/lib/libavcodec.a"
+    "${LUMACORE_FFMPEG_IOS_DIR}/lib/libswscale.a"
+    "${LUMACORE_FFMPEG_IOS_DIR}/lib/libswresample.a"
+    "${LUMACORE_FFMPEG_IOS_DIR}/lib/libavutil.a"
+    "-framework VideoToolbox"
+    "-framework CoreMedia"
+    "-framework AudioToolbox"
+    "-liconv"
+    "-lz"
+  )
+  target_compile_definitions(lumacore_logic PRIVATE LUMACORE_HAVE_FFMPEG=1)
 elseif(WIN32)
   add_definitions(-DLUMACORE_EXPORTS)
   add_library(lumacore SHARED
