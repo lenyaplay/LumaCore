@@ -9,7 +9,7 @@ enum class LicenseStatus { Valid, Expired, DeviceMismatch, InvalidSignature, Not
 
 // Offline Ed25519 verification of the activation token issued by server/
 // (ARCHITECTURE.md §6). Only the public key is embedded in the binary; no
-// network access after activation. Stub — implemented in Этап 6.
+// network access after activation.
 class TokenValidator {
  public:
   explicit TokenValidator(std::string publicKeyBase64);

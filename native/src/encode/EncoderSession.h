@@ -27,6 +27,11 @@ class EncoderSession {
 
   bool start(const std::string& outPath, int bitrateKbps, int width, int height);
   void submitFrame(void* platformImageHandle, int64_t ptsUs);
+  // Encodes a chunk of interleaved signed-16-bit PCM audio into the shared
+  // AAC stream. ptsUs is on the same absolute clock as submitFrame's ptsUs —
+  // the two streams share one PTS origin (see EncoderSession.cpp). No-op if
+  // start() hasn't been called or pcmData is null.
+  void submitAudioFrame(const void* pcmData, int numFrames, int sampleRate, int numChannels, int64_t ptsUs);
   bool stop();
 
   // Public only so EncoderSession.cpp's free helper functions can name it —

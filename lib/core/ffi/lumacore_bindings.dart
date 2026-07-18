@@ -14,6 +14,9 @@ class LumaEffectParamsDart {
     required this.vignetteSoftness,
     required this.particleIntensity,
     required this.effectMask,
+    required this.sepiaAmount,
+    required this.edgeThreshold,
+    required this.edgeIntensity,
   });
 
   final double brightness;
@@ -23,6 +26,9 @@ class LumaEffectParamsDart {
   final double vignetteSoftness;
   final double particleIntensity;
   final int effectMask;
+  final double sepiaAmount;
+  final double edgeThreshold;
+  final double edgeIntensity;
 }
 
 /// Dart-side mirror of the C `LumaStats` struct.
@@ -61,7 +67,10 @@ class LumaCoreBindings {
         ..vignetteRadius = params.vignetteRadius
         ..vignetteSoftness = params.vignetteSoftness
         ..particleIntensity = params.particleIntensity
-        ..effectMask = params.effectMask;
+        ..effectMask = params.effectMask
+        ..sepiaAmount = params.sepiaAmount
+        ..edgeThreshold = params.edgeThreshold
+        ..edgeIntensity = params.edgeIntensity;
       _bindings.lumacore_set_effect_params(sessionId, ptr);
     } finally {
       calloc.free(ptr);

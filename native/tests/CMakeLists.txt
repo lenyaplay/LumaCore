@@ -7,3 +7,8 @@ add_executable(lumacore_particle_tests test_particle_system.cpp)
 target_link_libraries(lumacore_particle_tests PRIVATE lumacore_logic)
 
 add_test(NAME lumacore_particle_tests COMMAND lumacore_particle_tests)
+
+add_executable(lumacore_token_validator_tests test_token_validator.cpp)
+target_link_libraries(lumacore_token_validator_tests PRIVATE lumacore_logic)
+
+add_test(NAME lumacore_token_validator_tests COMMAND lumacore_token_validator_tests)

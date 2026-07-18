@@ -1,23 +1,28 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/channels/native_channel.dart';
 import '../../core/ffi/lumacore_bindings.dart';
+import '../../core/settings/recording_settings.dart';
 import 'effects_controller.dart';
 
 const int _kEffectColorCorrection = 0x1;
 const int _kEffectVignette = 0x2;
 const int _kEffectParticles = 0x4;
+const int _kEffectSepia = 0x8;
+const int _kEffectEdges = 0x10;
+// Sepia/Edges are opt-in — off by default, unlike the base trio.
 const int _kEffectMaskDefault = _kEffectColorCorrection | _kEffectVignette | _kEffectParticles;
 
-class CameraScreen extends StatefulWidget {
+class CameraScreen extends ConsumerStatefulWidget {
   const CameraScreen({super.key});
 
   @override
-  State<CameraScreen> createState() => _CameraScreenState();
+  ConsumerState<CameraScreen> createState() => _CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen> {
+class _CameraScreenState extends ConsumerState<CameraScreen> {
   CameraStartResult? _camera;
   String? _error;
   bool _isRecording = false;
@@ -31,6 +36,9 @@ class _CameraScreenState extends State<CameraScreen> {
   double _vignetteRadius = 0.75;
   double _vignetteSoftness = 0.3;
   double _particleIntensity = 0.5;
+  double _sepiaAmount = 0.6;
+  double _edgeThreshold = 0.3;
+  double _edgeIntensity = 0.6;
   int _effectMask = _kEffectMaskDefault;
 
   @override
@@ -41,6 +49,11 @@ class _CameraScreenState extends State<CameraScreen> {
 
   Future<void> _startCamera() async {
     try {
+      final settings = ref.read(recordingSettingsProvider);
+      await NativeChannel.setRecordingSettings(
+        bitrateKbps: settings.bitrateKbps,
+        resolutionPreset: settings.resolutionPreset.wireValue,
+      );
       final camera = await NativeChannel.startCamera();
       if (!mounted) return;
       setState(() {
@@ -71,6 +84,9 @@ class _CameraScreenState extends State<CameraScreen> {
       vignetteSoftness: _vignetteSoftness,
       particleIntensity: _particleIntensity,
       effectMask: _effectMask,
+      sepiaAmount: _sepiaAmount,
+      edgeThreshold: _edgeThreshold,
+      edgeIntensity: _edgeIntensity,
     ));
   }
 
@@ -170,6 +186,27 @@ class _CameraScreenState extends State<CameraScreen> {
                       max: 1,
                       onChanged: (v) => update(() => _particleIntensity = v),
                     ),
+                    _EffectSlider(
+                      label: 'Sepia amount',
+                      value: _sepiaAmount,
+                      min: 0,
+                      max: 1,
+                      onChanged: (v) => update(() => _sepiaAmount = v),
+                    ),
+                    _EffectSlider(
+                      label: 'Edge threshold',
+                      value: _edgeThreshold,
+                      min: 0,
+                      max: 1,
+                      onChanged: (v) => update(() => _edgeThreshold = v),
+                    ),
+                    _EffectSlider(
+                      label: 'Edge intensity',
+                      value: _edgeIntensity,
+                      min: 0,
+                      max: 1,
+                      onChanged: (v) => update(() => _edgeIntensity = v),
+                    ),
                     const Divider(),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
@@ -192,6 +229,21 @@ class _CameraScreenState extends State<CameraScreen> {
                       value: _effectMask & _kEffectParticles != 0,
                       onChanged: (on) => update(() => _effectMask =
                           on ? _effectMask | _kEffectParticles : _effectMask & ~_kEffectParticles),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Sepia'),
+                      subtitle: const Text('Pure B&W: set Saturation to 0 above'),
+                      value: _effectMask & _kEffectSepia != 0,
+                      onChanged: (on) => update(
+                          () => _effectMask = on ? _effectMask | _kEffectSepia : _effectMask & ~_kEffectSepia),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Edges (comic)'),
+                      value: _effectMask & _kEffectEdges != 0,
+                      onChanged: (on) => update(
+                          () => _effectMask = on ? _effectMask | _kEffectEdges : _effectMask & ~_kEffectEdges),
                     ),
                   ],
                 ),

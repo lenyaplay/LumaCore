@@ -17,6 +17,7 @@ FFMPEG_COMMON_FLAGS=(
   --enable-avcodec
   --enable-avformat
   --enable-swscale
+  --enable-swresample
   --enable-protocol=file
   --enable-muxer=mp4
   --enable-encoder=aac

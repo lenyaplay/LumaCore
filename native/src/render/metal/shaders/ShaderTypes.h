@@ -19,13 +19,18 @@ struct alignas(16) EffectParamsGPU {
   float brightness, contrast, saturation, _pad0;
   float vignetteRadius, vignetteSoftness, particleIntensity, _pad1;
   long effectMask, _pad2;
+  float sepiaAmount, edgeThreshold, edgeIntensity, _pad3;
 };
 
 // effectMask bits (convention fixed here, not in ARCHITECTURE.md):
-//   0x1 = ColorCorrection, 0x2 = Vignette, 0x4 = Particles. Default 0x7 (all on).
+//   0x1 = ColorCorrection, 0x2 = Vignette, 0x4 = Particles, 0x8 = Sepia,
+//   0x10 = Edges. Default 0x7 (ColorCorrection+Vignette+Particles on; Sepia
+//   and Edges are opt-in, off by default).
 #define LUMACORE_EFFECT_COLOR_CORRECTION 0x1
 #define LUMACORE_EFFECT_VIGNETTE 0x2
 #define LUMACORE_EFFECT_PARTICLES 0x4
+#define LUMACORE_EFFECT_SEPIA 0x8
+#define LUMACORE_EFFECT_EDGES 0x10
 
 struct alignas(16) ParticleInstanceGPU {
   float x, y, alpha, size;

@@ -2,6 +2,7 @@
 
 #ifdef __APPLE__
 
+#import <CoreMedia/CoreMedia.h>
 #import <CoreVideo/CoreVideo.h>
 #import <Foundation/Foundation.h>
 
@@ -25,6 +26,14 @@
                                     ptsUs:(int64_t)ptsUs CF_RETURNS_RETAINED;
 - (void)setThermalState:(int64_t)session state:(int32_t)state;
 - (BOOL)stopRecording:(int64_t)session;
+// Extracts PCM from sampleBuffer and forwards it to the active recording's
+// AAC stream (no-op if no recording is active). Bypasses the Metal effects
+// pipeline entirely — audio never goes through renderFrame:.
+- (void)submitAudioSample:(CMSampleBufferRef)sampleBuffer session:(int64_t)session ptsUs:(int64_t)ptsUs;
+
+// Offline license verification (ARCHITECTURE.md §6) — not tied to a render
+// session. Returns a LumaLicenseStatus value (see lumacore_api.h).
+- (int32_t)validateLicense:(NSString*)tokenBlobJson deviceFingerprint:(NSString*)deviceFingerprint;
 
 @end
 

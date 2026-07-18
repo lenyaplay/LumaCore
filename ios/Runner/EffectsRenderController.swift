@@ -28,6 +28,16 @@ final class EffectsRenderController {
     return bridge.renderFrame(session, pixelBuffer: pixelBuffer, ptsUs: ptsUs)
   }
 
+  /// Call from CameraCaptureController.onAudioSample. Bypasses the Metal
+  /// pipeline entirely (audio has no GPU processing) — forwards straight to
+  /// the encoder internally if a recording is active, no-op otherwise.
+  func submitAudioSample(_ sampleBuffer: CMSampleBuffer) {
+    guard session != -1 else { return }
+    let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+    let ptsUs = Int64((CMTimeGetSeconds(pts) * 1_000_000).rounded())
+    bridge.submitAudioSample(sampleBuffer, session: session, ptsUs: ptsUs)
+  }
+
   /// Debug-only hook (see camera_screen.dart's long-press-to-throttle
   /// overlay) — forces the reported thermal state without real device heat,
   /// so the particles-off-at-state>=2 ladder can be demoed on demand.

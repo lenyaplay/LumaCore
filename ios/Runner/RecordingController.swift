@@ -18,8 +18,8 @@ final class RecordingController {
     case photosPermissionDenied
   }
 
-  // Minimal-milestone constant — no bitrate UI yet.
-  private static let bitrateKbps: Int32 = 6000
+  // Fallback default when the caller doesn't pass an explicit bitrate.
+  private static let defaultBitrateKbps: Int32 = 6000
 
   private let bridge = LumaCoreBridge()
   private let encodeQueue = DispatchQueue(label: "com.lumacore.recording.encode")
@@ -32,7 +32,8 @@ final class RecordingController {
   /// creates or releases it, only borrows it for the duration of a
   /// recording (see ai_plans/03-ios-metal-render-pipeline.md §8: one render
   /// session per camera lifecycle, not per recording).
-  func start(session: Int64, width: Int, height: Int, completion: @escaping (Result<URL, Error>) -> Void) {
+  func start(session: Int64, width: Int, height: Int, bitrateKbps: Int32 = RecordingController.defaultBitrateKbps,
+             completion: @escaping (Result<URL, Error>) -> Void) {
     encodeQueue.async { [weak self] in
       guard let self else { return }
       guard !self.recording else {
@@ -44,7 +45,7 @@ final class RecordingController {
       let started = self.bridge.startRecording(
         session,
         outputPath: url.path,
-        bitrateKbps: Self.bitrateKbps,
+        bitrateKbps: bitrateKbps,
         width: Int32(width),
         height: Int32(height)
       )

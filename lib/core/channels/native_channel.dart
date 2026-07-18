@@ -35,6 +35,29 @@ class NativeChannel {
     return result ?? '';
   }
 
+  /// Offline license verification (ARCHITECTURE.md §6) — no network access.
+  /// Returns a LumaLicenseStatus ordinal (0=Valid, 1=Expired,
+  /// 2=DeviceMismatch, 3=InvalidSignature, 4=NotActivated). This is
+  /// session-lifecycle-adjacent, not a per-frame call, so it goes through the
+  /// Platform Channel rather than dart:ffi.
+  static Future<int> validateLicense(String tokenBlobJson, String deviceFingerprint) async {
+    final result = await _channel.invokeMethod<int>('validateLicense', {
+      'tokenBlobJson': tokenBlobJson,
+      'deviceFingerprint': deviceFingerprint,
+    });
+    return result ?? 4; // NotActivated
+  }
+
+  /// Stores the bitrate/resolution to use for the next startCamera()
+  /// (resolution)/startRecording() (bitrate) call — call before startCamera()
+  /// so the preset is applied when the capture session is configured.
+  static Future<void> setRecordingSettings({required int bitrateKbps, required String resolutionPreset}) async {
+    await _channel.invokeMethod('setRecordingSettings', {
+      'bitrateKbps': bitrateKbps,
+      'resolutionPreset': resolutionPreset,
+    });
+  }
+
   /// Starts the native camera capture session. Throws [PlatformException] on
   /// permission denial or capture-device failure.
   static Future<CameraStartResult> startCamera() async {

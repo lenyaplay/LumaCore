@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include "encode/EncoderSession.h"
+#include "license/TokenValidator.h"
 #include "render/PlatformRenderBackendFactory.h"
 #include "render/RenderPipeline.h"
 
@@ -123,4 +124,26 @@ void lumacore_release(int64_t session) {
   if (it == g_sessions.end()) return;
   it->second.pipeline.shutdown();
   g_sessions.erase(it);
+}
+
+int32_t lumacore_submit_audio_frame(int64_t session, const void* pcmData, int32_t numFrames, int32_t sampleRate,
+                                     int32_t numChannels, int64_t ptsUs) {
+  auto it = g_sessions.find(session);
+  if (it == g_sessions.end() || !pcmData || numFrames <= 0) return -1;
+  Session& s = it->second;
+  if (!s.recording) return -1;  // same api-layer gate lumacore_render_frame uses for video
+  s.encoder.submitAudioFrame(pcmData, numFrames, sampleRate, numChannels, ptsUs);
+  return 0;
+}
+
+int32_t lumacore_validate_license(const char* tokenBlobJson, const char* deviceFingerprint) {
+  if (!tokenBlobJson || !deviceFingerprint) {
+    return static_cast<int32_t>(lumacore::license::LicenseStatus::NotActivated);
+  }
+  // Fetched once from the locally-running mock server's GET /public-key
+  // (server/app/crypto.py, seed persisted to server/.dev_signing_key so this
+  // stays valid across server restarts — see server/app/crypto.py). Only the
+  // public key is embedded, per ARCHITECTURE.md §6.
+  static const lumacore::license::TokenValidator kValidator("PqfyQCNi4Pv5t3fP7b/XSfUIzkw70DaUaTLDGm2JuRg=");
+  return static_cast<int32_t>(kValidator.validate(tokenBlobJson, deviceFingerprint));
 }

@@ -154,6 +154,20 @@ lumacore_particle_tests/fast:
 	cd /Users/lenyaplay/Documents/GitHub/LumaCore/native/build-ios-sim && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/lumacore_particle_tests.dir/build.make tests/CMakeFiles/lumacore_particle_tests.dir/build
 .PHONY : lumacore_particle_tests/fast
 
+# Convenience name for target.
+tests/CMakeFiles/lumacore_token_validator_tests.dir/rule:
+	cd /Users/lenyaplay/Documents/GitHub/LumaCore/native/build-ios-sim && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/lumacore_token_validator_tests.dir/rule
+.PHONY : tests/CMakeFiles/lumacore_token_validator_tests.dir/rule
+
+# Convenience name for target.
+lumacore_token_validator_tests: tests/CMakeFiles/lumacore_token_validator_tests.dir/rule
+.PHONY : lumacore_token_validator_tests
+
+# fast build rule for target.
+lumacore_token_validator_tests/fast:
+	cd /Users/lenyaplay/Documents/GitHub/LumaCore/native/build-ios-sim && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/lumacore_token_validator_tests.dir/build.make tests/CMakeFiles/lumacore_token_validator_tests.dir/build
+.PHONY : lumacore_token_validator_tests/fast
+
 test_particle_system.o: test_particle_system.cpp.o
 .PHONY : test_particle_system.o
 
@@ -202,6 +216,30 @@ test_ring_buffer.cpp.s:
 	cd /Users/lenyaplay/Documents/GitHub/LumaCore/native/build-ios-sim && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/lumacore_tests.dir/build.make tests/CMakeFiles/lumacore_tests.dir/test_ring_buffer.cpp.s
 .PHONY : test_ring_buffer.cpp.s
 
+test_token_validator.o: test_token_validator.cpp.o
+.PHONY : test_token_validator.o
+
+# target to build an object file
+test_token_validator.cpp.o:
+	cd /Users/lenyaplay/Documents/GitHub/LumaCore/native/build-ios-sim && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/lumacore_token_validator_tests.dir/build.make tests/CMakeFiles/lumacore_token_validator_tests.dir/test_token_validator.cpp.o
+.PHONY : test_token_validator.cpp.o
+
+test_token_validator.i: test_token_validator.cpp.i
+.PHONY : test_token_validator.i
+
+# target to preprocess a source file
+test_token_validator.cpp.i:
+	cd /Users/lenyaplay/Documents/GitHub/LumaCore/native/build-ios-sim && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/lumacore_token_validator_tests.dir/build.make tests/CMakeFiles/lumacore_token_validator_tests.dir/test_token_validator.cpp.i
+.PHONY : test_token_validator.cpp.i
+
+test_token_validator.s: test_token_validator.cpp.s
+.PHONY : test_token_validator.s
+
+# target to generate assembly for a file
+test_token_validator.cpp.s:
+	cd /Users/lenyaplay/Documents/GitHub/LumaCore/native/build-ios-sim && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/lumacore_token_validator_tests.dir/build.make tests/CMakeFiles/lumacore_token_validator_tests.dir/test_token_validator.cpp.s
+.PHONY : test_token_validator.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -213,12 +251,16 @@ help:
 	@echo "... test"
 	@echo "... lumacore_particle_tests"
 	@echo "... lumacore_tests"
+	@echo "... lumacore_token_validator_tests"
 	@echo "... test_particle_system.o"
 	@echo "... test_particle_system.i"
 	@echo "... test_particle_system.s"
 	@echo "... test_ring_buffer.o"
 	@echo "... test_ring_buffer.i"
 	@echo "... test_ring_buffer.s"
+	@echo "... test_token_validator.o"
+	@echo "... test_token_validator.i"
+	@echo "... test_token_validator.s"
 .PHONY : help
 
 

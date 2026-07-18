@@ -15,15 +15,22 @@ final class CameraCaptureController: NSObject {
   /// as the recording PTS source, see RecordingController.
   var onFrame: ((CVPixelBuffer, CMTime) -> Void)?
 
+  /// Delivered on `audioQueue` — a separate serial queue from `captureQueue`,
+  /// so a slow audio consumer never blocks frame delivery to the live
+  /// preview (and vice versa).
+  var onAudioSample: ((CMSampleBuffer) -> Void)?
+
   private let session = AVCaptureSession()
   private let captureQueue = DispatchQueue(label: "com.lumacore.camera.capture")
+  private let audioQueue = DispatchQueue(label: "com.lumacore.camera.audio")
   private var isConfigured = false
 
   // Resolved from the first delivered frame, not assumed from activeFormat —
   // reflects whatever rotation the connection actually applied.
   private var pendingStartCompletion: ((Result<CGSize, Error>) -> Void)?
 
-  func start(completion: @escaping (Result<CGSize, Error>) -> Void) {
+  func start(resolutionPreset: AVCaptureSession.Preset = .hd1920x1080,
+             completion: @escaping (Result<CGSize, Error>) -> Void) {
     requestPermissionIfNeeded { [weak self] granted in
       guard let self else { return }
       guard granted else {
@@ -36,6 +43,11 @@ final class CameraCaptureController: NSObject {
             try self.configureSession()
             self.isConfigured = true
           }
+          // Not gated on isConfigured — applied on every start() (cheap
+          // no-op if unchanged), so a resolution change picked in Settings
+          // takes effect the next time the Camera tab is opened, without
+          // needing a full session teardown/rebuild.
+          self.applyResolutionPreset(resolutionPreset)
           self.pendingStartCompletion = completion
           self.session.startRunning()
         } catch {
@@ -43,6 +55,13 @@ final class CameraCaptureController: NSObject {
         }
       }
     }
+  }
+
+  private func applyResolutionPreset(_ preset: AVCaptureSession.Preset) {
+    guard session.canSetSessionPreset(preset) else { return }
+    session.beginConfiguration()
+    session.sessionPreset = preset
+    session.commitConfiguration()
   }
 
   func stop() {
@@ -53,12 +72,26 @@ final class CameraCaptureController: NSObject {
     }
   }
 
+  // Video, then audio — the camera does not start at all without both
+  // grants (no video-only fallback; kept simple for this app's scope).
   private func requestPermissionIfNeeded(_ completion: @escaping (Bool) -> Void) {
-    switch AVCaptureDevice.authorizationStatus(for: .video) {
+    requestPermission(for: .video) { [weak self] videoGranted in
+      guard let self, videoGranted else {
+        completion(false)
+        return
+      }
+      self.requestPermission(for: .audio) { audioGranted in
+        completion(audioGranted)
+      }
+    }
+  }
+
+  private func requestPermission(for mediaType: AVMediaType, completion: @escaping (Bool) -> Void) {
+    switch AVCaptureDevice.authorizationStatus(for: mediaType) {
     case .authorized:
       completion(true)
     case .notDetermined:
-      AVCaptureDevice.requestAccess(for: .video) { granted in
+      AVCaptureDevice.requestAccess(for: mediaType) { granted in
         completion(granted)
       }
     case .denied, .restricted:
@@ -107,15 +140,45 @@ final class CameraCaptureController: NSObject {
         connection.videoOrientation = .portrait
       }
     }
+
+    guard let audioDevice = AVCaptureDevice.default(for: .audio) else {
+      throw CaptureError.noCaptureDevice
+    }
+    let audioInput = try AVCaptureDeviceInput(device: audioDevice)
+    guard session.canAddInput(audioInput) else {
+      throw CaptureError.configurationFailed
+    }
+    session.addInput(audioInput)
+
+    let audioOutput = AVCaptureAudioDataOutput()
+    // AVCaptureAudioDataOutput.audioSettings is API_UNAVAILABLE on iOS
+    // (macOS-only) — on iOS the output always vends samples in the
+    // device's native format. LumaCoreBridge.submitAudioSample: reads the
+    // actual sample rate/channel count from each CMSampleBuffer's
+    // AudioStreamBasicDescription at runtime instead of assuming a fixed
+    // format; EncoderSession::submitAudioFrame resamples whatever arrives
+    // into the AAC encoder's fixed 44.1kHz mono via libswresample.
+    audioOutput.setSampleBufferDelegate(self, queue: audioQueue)
+    guard session.canAddOutput(audioOutput) else {
+      throw CaptureError.configurationFailed
+    }
+    session.addOutput(audioOutput)
   }
 }
 
-extension CameraCaptureController: AVCaptureVideoDataOutputSampleBufferDelegate {
+extension CameraCaptureController: AVCaptureVideoDataOutputSampleBufferDelegate,
+  AVCaptureAudioDataOutputSampleBufferDelegate
+{
   func captureOutput(
     _ output: AVCaptureOutput,
     didOutput sampleBuffer: CMSampleBuffer,
     from connection: AVCaptureConnection
   ) {
+    if output is AVCaptureAudioDataOutput {
+      onAudioSample?(sampleBuffer)
+      return
+    }
+
     guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
     if let completion = pendingStartCompletion {

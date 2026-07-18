@@ -7,14 +7,26 @@ gives EdDSA natively, no ASN.1 signature encoding, equivalent security.
 import base64
 import struct
 import uuid
+from pathlib import Path
 
 import nacl.exceptions
 import nacl.signing
 
-# Dev-only keypair generated once per process. Only the public key needs to be
-# shared with a client (embedded in the native binary in the real app); the
-# private key never leaves this mock server.
-_signing_key = nacl.signing.SigningKey.generate()
+# Dev-only keypair, persisted to a gitignored seed file so it survives server
+# restarts. Without this, the public key native/src/api/lumacore_api.cpp
+# hardcodes (fetched once from GET /public-key) goes stale on every restart —
+# TokenValidator would reject every previously-issued token. Only the public
+# key needs to be shared with a client (embedded in the native binary in the
+# real app); the private key/seed never leaves this mock server.
+_SEED_PATH = Path(__file__).resolve().parent.parent / ".dev_signing_key"
+
+if _SEED_PATH.exists():
+    _signing_key = nacl.signing.SigningKey(_SEED_PATH.read_bytes())
+else:
+    _signing_key = nacl.signing.SigningKey.generate()
+    _SEED_PATH.write_bytes(bytes(_signing_key))
+    _SEED_PATH.chmod(0o600)
+
 _verify_key = _signing_key.verify_key
 
 SIG_ALG = "ed25519"

@@ -1,8 +1,19 @@
 cmake_minimum_required(VERSION 3.20)
-project(LumaCore CXX)
+project(LumaCore CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# --- Vendored offline-license crypto (ai_plans licensing work) --------------
+# Small, permissive-license, no-build-system C libraries — a full libsodium
+# cross-compile would be an FFmpeg-scale project for a single verify call.
+# ed25519: github.com/orlp/ed25519 (zlib license), commit b1f19fa. sha256:
+# hand-written here (FIPS 180-4, verified against hashlib.sha256 test
+# vectors in native/tests) — SHA-256 has none of Ed25519's constant-time
+# scalar-multiplication pitfalls, so vendoring a whole repo for one hash
+# function wasn't worth it.
+file(GLOB LUMACORE_ED25519_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/third_party/ed25519/src/*.c")
+set(LUMACORE_SHA256_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/third_party/sha256/sha256.c")
 
 # --- lumacore_logic: pure/platform-agnostic C++ (ARCHITECTURE.md §5) ---------
 # Configures and builds on any host with no NDK/ios-cmake/MSVC toolchain — this
@@ -14,8 +25,13 @@ add_library(lumacore_logic STATIC
   src/render/particles/ParticleSystem.cpp
   src/encode/EncoderSession.cpp
   src/license/TokenValidator.cpp
+  ${LUMACORE_ED25519_SOURCES}
+  ${LUMACORE_SHA256_SOURCES}
 )
-target_include_directories(lumacore_logic PUBLIC src)
+target_include_directories(lumacore_logic PUBLIC src
+  third_party/ed25519/src
+  third_party/sha256
+)
 
 enable_testing()
 add_subdirectory(tests)

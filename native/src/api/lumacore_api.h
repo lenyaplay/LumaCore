@@ -24,6 +24,7 @@ extern "C" {
 typedef struct {
   float brightness, contrast, saturation, vignetteRadius, vignetteSoftness, particleIntensity;
   int64_t effectMask;
+  float sepiaAmount, edgeThreshold, edgeIntensity;
 } LumaEffectParams;
 
 typedef struct {
@@ -31,6 +32,15 @@ typedef struct {
   uint32_t droppedFrames;
   int32_t thermalState;
 } LumaStats;
+
+// Mirrors lumacore::license::LicenseStatus (native/src/license/TokenValidator.h).
+typedef enum {
+  LUMACORE_LICENSE_VALID = 0,
+  LUMACORE_LICENSE_EXPIRED = 1,
+  LUMACORE_LICENSE_DEVICE_MISMATCH = 2,
+  LUMACORE_LICENSE_INVALID_SIGNATURE = 3,
+  LUMACORE_LICENSE_NOT_ACTIVATED = 4,
+} LumaLicenseStatus;
 
 // Initializes the render pipeline (RenderPipeline + platform IRenderBackend)
 // for this session. Returns -1 if the backend fails to initialize (Metal
@@ -53,6 +63,18 @@ LUMACORE_API int32_t lumacore_render_frame(int64_t session, void* cameraFrame, i
                                             void** outPreviewImage);
 LUMACORE_API int32_t lumacore_stop_recording(int64_t session);
 LUMACORE_API void lumacore_release(int64_t session);
+
+// Offline license verification (ARCHITECTURE.md §6) — not tied to a render
+// session, no network access. Returns a LumaLicenseStatus value.
+LUMACORE_API int32_t lumacore_validate_license(const char* tokenBlobJson, const char* deviceFingerprint);
+
+// Submits a chunk of interleaved PCM audio to the active recording's AAC
+// stream, on the same absolute clock as lumacore_render_frame's ptsUs (see
+// EncoderSession — the two streams share one PTS origin). No-op if no
+// recording is active. Returns 0 on success, -1 if the session/args are
+// invalid.
+LUMACORE_API int32_t lumacore_submit_audio_frame(int64_t session, const void* pcmData, int32_t numFrames,
+                                                  int32_t sampleRate, int32_t numChannels, int64_t ptsUs);
 
 #ifdef __cplusplus
 }

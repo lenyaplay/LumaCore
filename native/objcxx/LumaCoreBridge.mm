@@ -2,6 +2,8 @@
 
 #import "LumaCoreBridge.h"
 
+#import <AudioToolbox/AudioToolbox.h>
+
 #include "api/lumacore_api.h"
 
 @implementation LumaCoreBridge
@@ -42,6 +44,35 @@
 
 - (BOOL)stopRecording:(int64_t)session {
   return lumacore_stop_recording(session) == 0;
+}
+
+- (int32_t)validateLicense:(NSString*)tokenBlobJson deviceFingerprint:(NSString*)deviceFingerprint {
+  return lumacore_validate_license(tokenBlobJson.UTF8String, deviceFingerprint.UTF8String);
+}
+
+- (void)submitAudioSample:(CMSampleBufferRef)sampleBuffer session:(int64_t)session ptsUs:(int64_t)ptsUs {
+  CMBlockBufferRef blockBuffer = NULL;
+  AudioBufferList audioBufferList;
+  OSStatus status = CMSampleBufferGetAudioBufferListWithRetainedBlockBuffer(
+      sampleBuffer, NULL, &audioBufferList, sizeof(audioBufferList), NULL, NULL,
+      kCMSampleBufferFlag_AudioBufferList_Assure16ByteAlignment, &blockBuffer);
+  if (status != noErr || audioBufferList.mNumberBuffers == 0 || !blockBuffer) {
+    if (blockBuffer) CFRelease(blockBuffer);
+    return;
+  }
+
+  const AudioStreamBasicDescription* asbd =
+      CMAudioFormatDescriptionGetStreamBasicDescription(CMSampleBufferGetFormatDescription(sampleBuffer));
+  int sampleRate = asbd ? (int)asbd->mSampleRate : 0;
+  int numChannels = asbd ? (int)asbd->mChannelsPerFrame : 0;
+
+  // AVLinearPCMIsNonInterleaved=false in CameraCaptureController's
+  // audioSettings guarantees exactly one AudioBuffer here.
+  AudioBuffer buffer = audioBufferList.mBuffers[0];
+  int numFrames = (asbd && asbd->mBytesPerFrame > 0) ? (int)(buffer.mDataByteSize / asbd->mBytesPerFrame) : 0;
+
+  lumacore_submit_audio_frame(session, buffer.mData, numFrames, sampleRate, numChannels, ptsUs);
+  CFRelease(blockBuffer);
 }
 
 @end

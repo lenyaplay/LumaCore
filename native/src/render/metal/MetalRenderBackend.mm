@@ -25,8 +25,19 @@ EffectParamsGPU toGPU(const EffectParamsBlock& p) {
   g._pad1 = 0.0f;
   g.effectMask = p.effectMask;
   g._pad2 = 0;
+  g.sepiaAmount = p.sepiaAmount;
+  g.edgeThreshold = p.edgeThreshold;
+  g.edgeIntensity = p.edgeIntensity;
+  g._pad3 = 0.0f;
   return g;
 }
+
+// EffectParamsGPU (Metal-side) and EffectParamsBlock (host-side) are kept in
+// sync by hand across three files (EffectParams.h, ShaderTypes.h, toGPU()
+// above) — this catches a size mismatch from an edit that touched only one
+// or two of them.
+static_assert(sizeof(EffectParamsGPU) == sizeof(EffectParamsBlock),
+              "EffectParamsGPU and EffectParamsBlock must stay byte-identical");
 
 }  // namespace
 

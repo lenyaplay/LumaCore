@@ -191,6 +191,19 @@ lumacore_particle_tests/fast:
 	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/lumacore_particle_tests.dir/build.make tests/CMakeFiles/lumacore_particle_tests.dir/build
 .PHONY : lumacore_particle_tests/fast
 
+#=============================================================================
+# Target rules for targets named lumacore_token_validator_tests
+
+# Build rule for target.
+lumacore_token_validator_tests: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lumacore_token_validator_tests
+.PHONY : lumacore_token_validator_tests
+
+# fast build rule for target.
+lumacore_token_validator_tests/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/lumacore_token_validator_tests.dir/build.make tests/CMakeFiles/lumacore_token_validator_tests.dir/build
+.PHONY : lumacore_token_validator_tests/fast
+
 objcxx/LumaCoreBridge.o: objcxx/LumaCoreBridge.mm.o
 .PHONY : objcxx/LumaCoreBridge.o
 
@@ -383,6 +396,246 @@ src/render/particles/ParticleSystem.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/src/render/particles/ParticleSystem.cpp.s
 .PHONY : src/render/particles/ParticleSystem.cpp.s
 
+third_party/ed25519/src/add_scalar.o: third_party/ed25519/src/add_scalar.c.o
+.PHONY : third_party/ed25519/src/add_scalar.o
+
+# target to build an object file
+third_party/ed25519/src/add_scalar.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/add_scalar.c.o
+.PHONY : third_party/ed25519/src/add_scalar.c.o
+
+third_party/ed25519/src/add_scalar.i: third_party/ed25519/src/add_scalar.c.i
+.PHONY : third_party/ed25519/src/add_scalar.i
+
+# target to preprocess a source file
+third_party/ed25519/src/add_scalar.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/add_scalar.c.i
+.PHONY : third_party/ed25519/src/add_scalar.c.i
+
+third_party/ed25519/src/add_scalar.s: third_party/ed25519/src/add_scalar.c.s
+.PHONY : third_party/ed25519/src/add_scalar.s
+
+# target to generate assembly for a file
+third_party/ed25519/src/add_scalar.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/add_scalar.c.s
+.PHONY : third_party/ed25519/src/add_scalar.c.s
+
+third_party/ed25519/src/fe.o: third_party/ed25519/src/fe.c.o
+.PHONY : third_party/ed25519/src/fe.o
+
+# target to build an object file
+third_party/ed25519/src/fe.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/fe.c.o
+.PHONY : third_party/ed25519/src/fe.c.o
+
+third_party/ed25519/src/fe.i: third_party/ed25519/src/fe.c.i
+.PHONY : third_party/ed25519/src/fe.i
+
+# target to preprocess a source file
+third_party/ed25519/src/fe.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/fe.c.i
+.PHONY : third_party/ed25519/src/fe.c.i
+
+third_party/ed25519/src/fe.s: third_party/ed25519/src/fe.c.s
+.PHONY : third_party/ed25519/src/fe.s
+
+# target to generate assembly for a file
+third_party/ed25519/src/fe.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/fe.c.s
+.PHONY : third_party/ed25519/src/fe.c.s
+
+third_party/ed25519/src/ge.o: third_party/ed25519/src/ge.c.o
+.PHONY : third_party/ed25519/src/ge.o
+
+# target to build an object file
+third_party/ed25519/src/ge.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/ge.c.o
+.PHONY : third_party/ed25519/src/ge.c.o
+
+third_party/ed25519/src/ge.i: third_party/ed25519/src/ge.c.i
+.PHONY : third_party/ed25519/src/ge.i
+
+# target to preprocess a source file
+third_party/ed25519/src/ge.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/ge.c.i
+.PHONY : third_party/ed25519/src/ge.c.i
+
+third_party/ed25519/src/ge.s: third_party/ed25519/src/ge.c.s
+.PHONY : third_party/ed25519/src/ge.s
+
+# target to generate assembly for a file
+third_party/ed25519/src/ge.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/ge.c.s
+.PHONY : third_party/ed25519/src/ge.c.s
+
+third_party/ed25519/src/keypair.o: third_party/ed25519/src/keypair.c.o
+.PHONY : third_party/ed25519/src/keypair.o
+
+# target to build an object file
+third_party/ed25519/src/keypair.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/keypair.c.o
+.PHONY : third_party/ed25519/src/keypair.c.o
+
+third_party/ed25519/src/keypair.i: third_party/ed25519/src/keypair.c.i
+.PHONY : third_party/ed25519/src/keypair.i
+
+# target to preprocess a source file
+third_party/ed25519/src/keypair.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/keypair.c.i
+.PHONY : third_party/ed25519/src/keypair.c.i
+
+third_party/ed25519/src/keypair.s: third_party/ed25519/src/keypair.c.s
+.PHONY : third_party/ed25519/src/keypair.s
+
+# target to generate assembly for a file
+third_party/ed25519/src/keypair.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/keypair.c.s
+.PHONY : third_party/ed25519/src/keypair.c.s
+
+third_party/ed25519/src/sc.o: third_party/ed25519/src/sc.c.o
+.PHONY : third_party/ed25519/src/sc.o
+
+# target to build an object file
+third_party/ed25519/src/sc.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/sc.c.o
+.PHONY : third_party/ed25519/src/sc.c.o
+
+third_party/ed25519/src/sc.i: third_party/ed25519/src/sc.c.i
+.PHONY : third_party/ed25519/src/sc.i
+
+# target to preprocess a source file
+third_party/ed25519/src/sc.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/sc.c.i
+.PHONY : third_party/ed25519/src/sc.c.i
+
+third_party/ed25519/src/sc.s: third_party/ed25519/src/sc.c.s
+.PHONY : third_party/ed25519/src/sc.s
+
+# target to generate assembly for a file
+third_party/ed25519/src/sc.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/sc.c.s
+.PHONY : third_party/ed25519/src/sc.c.s
+
+third_party/ed25519/src/seed.o: third_party/ed25519/src/seed.c.o
+.PHONY : third_party/ed25519/src/seed.o
+
+# target to build an object file
+third_party/ed25519/src/seed.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/seed.c.o
+.PHONY : third_party/ed25519/src/seed.c.o
+
+third_party/ed25519/src/seed.i: third_party/ed25519/src/seed.c.i
+.PHONY : third_party/ed25519/src/seed.i
+
+# target to preprocess a source file
+third_party/ed25519/src/seed.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/seed.c.i
+.PHONY : third_party/ed25519/src/seed.c.i
+
+third_party/ed25519/src/seed.s: third_party/ed25519/src/seed.c.s
+.PHONY : third_party/ed25519/src/seed.s
+
+# target to generate assembly for a file
+third_party/ed25519/src/seed.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/seed.c.s
+.PHONY : third_party/ed25519/src/seed.c.s
+
+third_party/ed25519/src/sha512.o: third_party/ed25519/src/sha512.c.o
+.PHONY : third_party/ed25519/src/sha512.o
+
+# target to build an object file
+third_party/ed25519/src/sha512.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/sha512.c.o
+.PHONY : third_party/ed25519/src/sha512.c.o
+
+third_party/ed25519/src/sha512.i: third_party/ed25519/src/sha512.c.i
+.PHONY : third_party/ed25519/src/sha512.i
+
+# target to preprocess a source file
+third_party/ed25519/src/sha512.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/sha512.c.i
+.PHONY : third_party/ed25519/src/sha512.c.i
+
+third_party/ed25519/src/sha512.s: third_party/ed25519/src/sha512.c.s
+.PHONY : third_party/ed25519/src/sha512.s
+
+# target to generate assembly for a file
+third_party/ed25519/src/sha512.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/sha512.c.s
+.PHONY : third_party/ed25519/src/sha512.c.s
+
+third_party/ed25519/src/sign.o: third_party/ed25519/src/sign.c.o
+.PHONY : third_party/ed25519/src/sign.o
+
+# target to build an object file
+third_party/ed25519/src/sign.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/sign.c.o
+.PHONY : third_party/ed25519/src/sign.c.o
+
+third_party/ed25519/src/sign.i: third_party/ed25519/src/sign.c.i
+.PHONY : third_party/ed25519/src/sign.i
+
+# target to preprocess a source file
+third_party/ed25519/src/sign.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/sign.c.i
+.PHONY : third_party/ed25519/src/sign.c.i
+
+third_party/ed25519/src/sign.s: third_party/ed25519/src/sign.c.s
+.PHONY : third_party/ed25519/src/sign.s
+
+# target to generate assembly for a file
+third_party/ed25519/src/sign.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/sign.c.s
+.PHONY : third_party/ed25519/src/sign.c.s
+
+third_party/ed25519/src/verify.o: third_party/ed25519/src/verify.c.o
+.PHONY : third_party/ed25519/src/verify.o
+
+# target to build an object file
+third_party/ed25519/src/verify.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/verify.c.o
+.PHONY : third_party/ed25519/src/verify.c.o
+
+third_party/ed25519/src/verify.i: third_party/ed25519/src/verify.c.i
+.PHONY : third_party/ed25519/src/verify.i
+
+# target to preprocess a source file
+third_party/ed25519/src/verify.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/verify.c.i
+.PHONY : third_party/ed25519/src/verify.c.i
+
+third_party/ed25519/src/verify.s: third_party/ed25519/src/verify.c.s
+.PHONY : third_party/ed25519/src/verify.s
+
+# target to generate assembly for a file
+third_party/ed25519/src/verify.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/ed25519/src/verify.c.s
+.PHONY : third_party/ed25519/src/verify.c.s
+
+third_party/sha256/sha256.o: third_party/sha256/sha256.c.o
+.PHONY : third_party/sha256/sha256.o
+
+# target to build an object file
+third_party/sha256/sha256.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/sha256/sha256.c.o
+.PHONY : third_party/sha256/sha256.c.o
+
+third_party/sha256/sha256.i: third_party/sha256/sha256.c.i
+.PHONY : third_party/sha256/sha256.i
+
+# target to preprocess a source file
+third_party/sha256/sha256.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/sha256/sha256.c.i
+.PHONY : third_party/sha256/sha256.c.i
+
+third_party/sha256/sha256.s: third_party/sha256/sha256.c.s
+.PHONY : third_party/sha256/sha256.s
+
+# target to generate assembly for a file
+third_party/sha256/sha256.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/third_party/sha256/sha256.c.s
+.PHONY : third_party/sha256/sha256.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -397,6 +650,7 @@ help:
 	@echo "... lumacore_logic"
 	@echo "... lumacore_particle_tests"
 	@echo "... lumacore_tests"
+	@echo "... lumacore_token_validator_tests"
 	@echo "... objcxx/LumaCoreBridge.o"
 	@echo "... objcxx/LumaCoreBridge.i"
 	@echo "... objcxx/LumaCoreBridge.s"
@@ -421,6 +675,36 @@ help:
 	@echo "... src/render/particles/ParticleSystem.o"
 	@echo "... src/render/particles/ParticleSystem.i"
 	@echo "... src/render/particles/ParticleSystem.s"
+	@echo "... third_party/ed25519/src/add_scalar.o"
+	@echo "... third_party/ed25519/src/add_scalar.i"
+	@echo "... third_party/ed25519/src/add_scalar.s"
+	@echo "... third_party/ed25519/src/fe.o"
+	@echo "... third_party/ed25519/src/fe.i"
+	@echo "... third_party/ed25519/src/fe.s"
+	@echo "... third_party/ed25519/src/ge.o"
+	@echo "... third_party/ed25519/src/ge.i"
+	@echo "... third_party/ed25519/src/ge.s"
+	@echo "... third_party/ed25519/src/keypair.o"
+	@echo "... third_party/ed25519/src/keypair.i"
+	@echo "... third_party/ed25519/src/keypair.s"
+	@echo "... third_party/ed25519/src/sc.o"
+	@echo "... third_party/ed25519/src/sc.i"
+	@echo "... third_party/ed25519/src/sc.s"
+	@echo "... third_party/ed25519/src/seed.o"
+	@echo "... third_party/ed25519/src/seed.i"
+	@echo "... third_party/ed25519/src/seed.s"
+	@echo "... third_party/ed25519/src/sha512.o"
+	@echo "... third_party/ed25519/src/sha512.i"
+	@echo "... third_party/ed25519/src/sha512.s"
+	@echo "... third_party/ed25519/src/sign.o"
+	@echo "... third_party/ed25519/src/sign.i"
+	@echo "... third_party/ed25519/src/sign.s"
+	@echo "... third_party/ed25519/src/verify.o"
+	@echo "... third_party/ed25519/src/verify.i"
+	@echo "... third_party/ed25519/src/verify.s"
+	@echo "... third_party/sha256/sha256.o"
+	@echo "... third_party/sha256/sha256.i"
+	@echo "... third_party/sha256/sha256.s"
 .PHONY : help
 
 

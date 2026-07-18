@@ -276,6 +276,15 @@ final class LumaEffectParams extends ffi.Struct {
 
   @ffi.Int64()
   external int effectMask;
+
+  @ffi.Float()
+  external double sepiaAmount;
+
+  @ffi.Float()
+  external double edgeThreshold;
+
+  @ffi.Float()
+  external double edgeIntensity;
 }
 
 final class LumaStats extends ffi.Struct {

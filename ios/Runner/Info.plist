@@ -44,5 +44,14 @@
 	<string>LumaCore uses the camera to show a live preview and record video with real-time effects.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>LumaCore saves your recorded videos to your Photos library.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>LumaCore uses the microphone to record audio together with your videos.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Mock license backend (server/) runs on plain HTTP on the local
+		     network — scoped to local networking only, not arbitrary loads. -->
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

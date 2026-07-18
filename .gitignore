@@ -85,6 +85,7 @@ ios/LumaCoreKit.xcframework/
 server/.venv/
 server/**/__pycache__/
 server/**/*.pyc
+server/.dev_signing_key
 .pytest_cache/
 
 # --- IDE ---
