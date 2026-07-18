@@ -140,6 +140,44 @@ lumacore_tests/fast:
 	cd /Users/lenyaplay/Documents/GitHub/LumaCore/native/build-ios-device && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/lumacore_tests.dir/build.make tests/CMakeFiles/lumacore_tests.dir/build
 .PHONY : lumacore_tests/fast
 
+# Convenience name for target.
+tests/CMakeFiles/lumacore_particle_tests.dir/rule:
+	cd /Users/lenyaplay/Documents/GitHub/LumaCore/native/build-ios-device && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/lumacore_particle_tests.dir/rule
+.PHONY : tests/CMakeFiles/lumacore_particle_tests.dir/rule
+
+# Convenience name for target.
+lumacore_particle_tests: tests/CMakeFiles/lumacore_particle_tests.dir/rule
+.PHONY : lumacore_particle_tests
+
+# fast build rule for target.
+lumacore_particle_tests/fast:
+	cd /Users/lenyaplay/Documents/GitHub/LumaCore/native/build-ios-device && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/lumacore_particle_tests.dir/build.make tests/CMakeFiles/lumacore_particle_tests.dir/build
+.PHONY : lumacore_particle_tests/fast
+
+test_particle_system.o: test_particle_system.cpp.o
+.PHONY : test_particle_system.o
+
+# target to build an object file
+test_particle_system.cpp.o:
+	cd /Users/lenyaplay/Documents/GitHub/LumaCore/native/build-ios-device && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/lumacore_particle_tests.dir/build.make tests/CMakeFiles/lumacore_particle_tests.dir/test_particle_system.cpp.o
+.PHONY : test_particle_system.cpp.o
+
+test_particle_system.i: test_particle_system.cpp.i
+.PHONY : test_particle_system.i
+
+# target to preprocess a source file
+test_particle_system.cpp.i:
+	cd /Users/lenyaplay/Documents/GitHub/LumaCore/native/build-ios-device && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/lumacore_particle_tests.dir/build.make tests/CMakeFiles/lumacore_particle_tests.dir/test_particle_system.cpp.i
+.PHONY : test_particle_system.cpp.i
+
+test_particle_system.s: test_particle_system.cpp.s
+.PHONY : test_particle_system.s
+
+# target to generate assembly for a file
+test_particle_system.cpp.s:
+	cd /Users/lenyaplay/Documents/GitHub/LumaCore/native/build-ios-device && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/lumacore_particle_tests.dir/build.make tests/CMakeFiles/lumacore_particle_tests.dir/test_particle_system.cpp.s
+.PHONY : test_particle_system.cpp.s
+
 test_ring_buffer.o: test_ring_buffer.cpp.o
 .PHONY : test_ring_buffer.o
 
@@ -173,7 +211,11 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... test"
+	@echo "... lumacore_particle_tests"
 	@echo "... lumacore_tests"
+	@echo "... test_particle_system.o"
+	@echo "... test_particle_system.i"
+	@echo "... test_particle_system.s"
 	@echo "... test_ring_buffer.o"
 	@echo "... test_ring_buffer.i"
 	@echo "... test_ring_buffer.s"

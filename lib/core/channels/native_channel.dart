@@ -4,11 +4,21 @@ import 'package:flutter/services.dart';
 /// the buffer dimensions it observed after rotation, not an assumed size, so
 /// the Flutter side can render with the correct aspect ratio.
 class CameraStartResult {
-  const CameraStartResult({required this.textureId, required this.width, required this.height});
+  const CameraStartResult({
+    required this.textureId,
+    required this.width,
+    required this.height,
+    required this.sessionId,
+  });
 
   final int textureId;
   final int width;
   final int height;
+  // The render session id lumacore_render_init already assigned natively
+  // (EffectsRenderController.start, ai_plans/03-ios-metal-render-pipeline.md
+  // §8/§9) — Dart never creates or releases this session, only uses the id
+  // for dart:ffi calls (setEffectParams/getStats) until stopCamera().
+  final int sessionId;
 }
 
 /// Platform Channel boundary for calls that must originate from Kotlin/Swift/
@@ -36,6 +46,7 @@ class NativeChannel {
       textureId: result['textureId'] as int,
       width: result['width'] as int,
       height: result['height'] as int,
+      sessionId: result['sessionId'] as int,
     );
   }
 
@@ -58,5 +69,15 @@ class NativeChannel {
   /// natively before this resolves.
   static Future<void> stopRecording() async {
     await _channel.invokeMethod('stopRecording');
+  }
+
+  /// Debug-only: forces the render session's reported thermal state without
+  /// actually overheating the device, so the thermal-throttling ladder
+  /// (particles disabled at state >= 2) can be verified on demand. This is
+  /// session-lifecycle-adjacent control, not a per-frame call, so it goes
+  /// through the Platform Channel rather than dart:ffi — see
+  /// ai_plans/03-ios-metal-render-pipeline.md §9/§11 p.7.
+  static Future<void> forceThermalStateForTesting(int state) async {
+    await _channel.invokeMethod('forceThermalStateForTesting', {'state': state});
   }
 }

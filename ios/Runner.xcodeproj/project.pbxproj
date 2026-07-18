@@ -15,6 +15,7 @@
 		3C48D4524D73E3855E2AA994 /* CameraPreviewTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F6E50F9D00A870A8CE4EFD3 /* CameraPreviewTexture.swift */; };
 		6870CF9C5394B847B2CF8EFF /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B58DF56F924E30CB7402A765 /* libz.tbd */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		7D8864301E48D4838DBCFC0E /* EffectsRenderController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A401EA2C08BCC9EE4B9312 /* EffectsRenderController.swift */; };
 		7EA22D1EA71AD406BB07051B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9D2B4917F8059AE5D812832 /* Foundation.framework */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
@@ -74,6 +75,7 @@
 		7695AFAFDBA31B6B9FF33BD4 /* RunnerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A7C66593132204F9C7C184B /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
+		89A401EA2C08BCC9EE4B9312 /* EffectsRenderController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EffectsRenderController.swift; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -189,6 +191,7 @@
 				ABE385A2A1CF728065AD942B /* CameraCaptureController.swift */,
 				6F6E50F9D00A870A8CE4EFD3 /* CameraPreviewTexture.swift */,
 				A2820929ADEAFB2901B159C6 /* RecordingController.swift */,
+				89A401EA2C08BCC9EE4B9312 /* EffectsRenderController.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -256,6 +259,7 @@
 				97C146EA1CF9000F007C117D /* Sources */,
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
+				49B5B778140E1C6C836CD560 /* Copy LumaCore Metal Library */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 			);
@@ -356,6 +360,28 @@
 			shellPath = /bin/sh;
 			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
 		};
+		49B5B778140E1C6C836CD560 /* Copy LumaCore Metal Library */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/../native/build-ios-device/lumacore.metallib",
+				"$(SRCROOT)/../native/build-ios-sim/lumacore.metallib",
+			);
+			name = "Copy LumaCore Metal Library";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/lumacore.metallib",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nSRC_DIR=\"${SRCROOT}/../native/build-ios-device\"\nif [ \"${PLATFORM_NAME}\" = \"iphonesimulator\" ]; then\n  SRC_DIR=\"${SRCROOT}/../native/build-ios-sim\"\nfi\nif [ ! -f \"${SRC_DIR}/lumacore.metallib\" ]; then\n  echo \"error: ${SRC_DIR}/lumacore.metallib not found — run tools/ios/build_xcframework.sh first.\" >&2\n  exit 1\nfi\nmkdir -p \"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\ncp \"${SRC_DIR}/lumacore.metallib\" \"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/lumacore.metallib\"\n";
+			showEnvVarsInLog = 1;
+		};
 		9740EEB61CF901F6004384FC /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -391,6 +417,7 @@
 				E4028C882B1EA9DEB04AAD34 /* CameraCaptureController.swift in Sources */,
 				3C48D4524D73E3855E2AA994 /* CameraPreviewTexture.swift in Sources */,
 				D1E2F7D4E8C0C9134FFF39F7 /* RecordingController.swift in Sources */,
+				7D8864301E48D4838DBCFC0E /* EffectsRenderController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -515,6 +542,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.lumacore.lumacore;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_STYLE = "non-global";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -724,6 +752,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.lumacore.lumacore;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_STYLE = "non-global";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -756,6 +785,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.lumacore.lumacore;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_STYLE = "non-global";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";

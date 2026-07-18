@@ -1,6 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/channels/native_channel.dart';
+import '../../core/ffi/lumacore_bindings.dart';
+import 'effects_controller.dart';
+
+const int _kEffectColorCorrection = 0x1;
+const int _kEffectVignette = 0x2;
+const int _kEffectParticles = 0x4;
+const int _kEffectMaskDefault = _kEffectColorCorrection | _kEffectVignette | _kEffectParticles;
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -13,6 +21,17 @@ class _CameraScreenState extends State<CameraScreen> {
   CameraStartResult? _camera;
   String? _error;
   bool _isRecording = false;
+
+  EffectsController? _effects;
+  LumaStatsDart? _stats;
+
+  double _brightness = 0.0;
+  double _contrast = 1.0;
+  double _saturation = 1.0;
+  double _vignetteRadius = 0.75;
+  double _vignetteSoftness = 0.3;
+  double _particleIntensity = 0.5;
+  int _effectMask = _kEffectMaskDefault;
 
   @override
   void initState() {
@@ -28,12 +47,31 @@ class _CameraScreenState extends State<CameraScreen> {
         _camera = camera;
         _error = null;
       });
+      final effects = EffectsController(camera.sessionId);
+      effects.startStatsPolling((stats) {
+        if (!mounted) return;
+        setState(() => _stats = stats);
+      });
+      _effects = effects;
+      _pushEffectParams();
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _error = 'Camera unavailable: $e';
       });
     }
+  }
+
+  void _pushEffectParams() {
+    _effects?.updateParams(LumaEffectParamsDart(
+      brightness: _brightness,
+      contrast: _contrast,
+      saturation: _saturation,
+      vignetteRadius: _vignetteRadius,
+      vignetteSoftness: _vignetteSoftness,
+      particleIntensity: _particleIntensity,
+      effectMask: _effectMask,
+    ));
   }
 
   Future<void> _toggleRecording() async {
@@ -69,8 +107,110 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
+  void _showEffectsSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            void update(VoidCallback change) {
+              setSheetState(change);
+              setState(() {});
+              _pushEffectParams();
+            }
+
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Effects', style: Theme.of(context).textTheme.titleMedium),
+                    _EffectSlider(
+                      label: 'Brightness',
+                      value: _brightness,
+                      min: -1,
+                      max: 1,
+                      onChanged: (v) => update(() => _brightness = v),
+                    ),
+                    _EffectSlider(
+                      label: 'Contrast',
+                      value: _contrast,
+                      min: 0,
+                      max: 2,
+                      onChanged: (v) => update(() => _contrast = v),
+                    ),
+                    _EffectSlider(
+                      label: 'Saturation',
+                      value: _saturation,
+                      min: 0,
+                      max: 2,
+                      onChanged: (v) => update(() => _saturation = v),
+                    ),
+                    _EffectSlider(
+                      label: 'Vignette radius',
+                      value: _vignetteRadius,
+                      min: 0,
+                      max: 1,
+                      onChanged: (v) => update(() => _vignetteRadius = v),
+                    ),
+                    _EffectSlider(
+                      label: 'Vignette softness',
+                      value: _vignetteSoftness,
+                      min: 0,
+                      max: 1,
+                      onChanged: (v) => update(() => _vignetteSoftness = v),
+                    ),
+                    _EffectSlider(
+                      label: 'Particle intensity',
+                      value: _particleIntensity,
+                      min: 0,
+                      max: 1,
+                      onChanged: (v) => update(() => _particleIntensity = v),
+                    ),
+                    const Divider(),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Color correction'),
+                      value: _effectMask & _kEffectColorCorrection != 0,
+                      onChanged: (on) => update(() => _effectMask = on
+                          ? _effectMask | _kEffectColorCorrection
+                          : _effectMask & ~_kEffectColorCorrection),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Vignette'),
+                      value: _effectMask & _kEffectVignette != 0,
+                      onChanged: (on) => update(() => _effectMask =
+                          on ? _effectMask | _kEffectVignette : _effectMask & ~_kEffectVignette),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Particles'),
+                      value: _effectMask & _kEffectParticles != 0,
+                      onChanged: (on) => update(() => _effectMask =
+                          on ? _effectMask | _kEffectParticles : _effectMask & ~_kEffectParticles),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _forceThermalCritical() async {
+    if (!kDebugMode || _camera == null) return;
+    await NativeChannel.forceThermalStateForTesting(3);
+  }
+
   @override
   void dispose() {
+    _effects?.dispose();
     // Fire-and-forget: dispose() can't await, and there's nothing meaningful
     // to do with a stopCamera/stopRecording failure once the screen is gone.
     if (_isRecording) {
@@ -89,21 +229,48 @@ class _CameraScreenState extends State<CameraScreen> {
             width: double.infinity,
             color: Colors.black,
             alignment: Alignment.center,
-            child: _buildPreview(),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Center(child: _buildPreview()),
+                if (_stats != null)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: GestureDetector(
+                      onLongPress: _forceThermalCritical,
+                      child: _DebugStatsOverlay(stats: _stats!),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
         SafeArea(
           top: false,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            child: FloatingActionButton.large(
-              onPressed: _camera == null ? null : _toggleRecording,
-              tooltip: _isRecording ? 'Stop Recording' : 'Start Recording',
-              backgroundColor: _isRecording ? Colors.white : Colors.red,
-              child: Icon(
-                _isRecording ? Icons.stop : Icons.fiber_manual_record,
-                color: _isRecording ? Colors.red : null,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FloatingActionButton(
+                  heroTag: 'effects',
+                  onPressed: _camera == null ? null : _showEffectsSheet,
+                  tooltip: 'Effects',
+                  child: const Icon(Icons.tune),
+                ),
+                const SizedBox(width: 24),
+                FloatingActionButton.large(
+                  heroTag: 'record',
+                  onPressed: _camera == null ? null : _toggleRecording,
+                  tooltip: _isRecording ? 'Stop Recording' : 'Start Recording',
+                  backgroundColor: _isRecording ? Colors.white : Colors.red,
+                  child: Icon(
+                    _isRecording ? Icons.stop : Icons.fiber_manual_record,
+                    color: _isRecording ? Colors.red : null,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -126,13 +293,74 @@ class _CameraScreenState extends State<CameraScreen> {
     if (camera == null) {
       return const CircularProgressIndicator(color: Colors.white70);
     }
-    // Raw camera passthrough (iOS pull-model, ARCHITECTURE.md §3). GPU shader
-    // pipeline lands in Этап 4 — this is the unprocessed camera feed.
+    // GPU-processed preview (iOS pull-model, ARCHITECTURE.md §3): the native
+    // side runs every frame through the 3-pass Metal pipeline
+    // (color correction -> vignette -> particles) before it ever reaches
+    // this texture — see ai_plans/03-ios-metal-render-pipeline.md.
     // AspectRatio prevents Texture() from stretching the buffer to fill the
     // container — Texture always sizes to its parent's full constraints.
     return AspectRatio(
       aspectRatio: camera.width / camera.height,
       child: Texture(textureId: camera.textureId),
+    );
+  }
+}
+
+class _EffectSlider extends StatelessWidget {
+  const _EffectSlider({
+    required this.label,
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.onChanged,
+  });
+
+  final String label;
+  final double value;
+  final double min;
+  final double max;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(width: 130, child: Text(label)),
+        Expanded(
+          child: Slider(
+            value: value,
+            min: min,
+            max: max,
+            // onChanged (not onChangeEnd) — this is what demonstrates why
+            // this call goes over dart:ffi rather than a Platform Channel:
+            // it fires at tens of Hz while dragging.
+            onChanged: onChanged,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DebugStatsOverlay extends StatelessWidget {
+  const _DebugStatsOverlay({required this.stats});
+
+  final LumaStatsDart stats;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        'fps: ${stats.fps.toStringAsFixed(1)}  '
+        'frame: ${stats.avgFrameMs.toStringAsFixed(1)}ms\n'
+        'dropped: ${stats.droppedFrames}  thermal: ${stats.thermalState}',
+        style: const TextStyle(color: Colors.white, fontSize: 11, fontFamily: 'monospace'),
+      ),
     );
   }
 }

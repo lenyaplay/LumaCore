@@ -2,3 +2,8 @@ add_executable(lumacore_tests test_ring_buffer.cpp)
 target_link_libraries(lumacore_tests PRIVATE lumacore_logic)
 
 add_test(NAME lumacore_tests COMMAND lumacore_tests)
+
+add_executable(lumacore_particle_tests test_particle_system.cpp)
+target_link_libraries(lumacore_particle_tests PRIVATE lumacore_logic)
+
+add_test(NAME lumacore_particle_tests COMMAND lumacore_particle_tests)

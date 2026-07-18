@@ -6,6 +6,7 @@ import UIKit
   private let cameraController = CameraCaptureController()
   private let previewTexture = CameraPreviewTexture()
   private let recordingController = RecordingController()
+  private let effectsController = EffectsRenderController()
 
   // Set once in handleStartCamera from the actually-delivered frame size —
   // recording must encode at the same dimensions the camera is producing.
@@ -22,9 +23,12 @@ import UIKit
     // (Keychain UUID). The render loop itself does not go through here —
     // dart:ffi + Obj-C++ bridge only.
     if let controller = window?.rootViewController as? FlutterViewController {
-      cameraController.onFrame = { [weak previewTexture, weak recordingController] pixelBuffer, pts in
-        previewTexture?.updateFrame(pixelBuffer)
-        recordingController?.submitFrame(pixelBuffer, pts: pts)
+      cameraController.onFrame = { [weak effectsController, weak previewTexture] pixelBuffer, pts in
+        guard let rendered = effectsController?.renderFrame(pixelBuffer, pts: pts) else { return }
+        previewTexture?.updateFrame(rendered)
+        // recordingController is NOT called here — recording (if active)
+        // already happened inside lumacore_render_frame, see
+        // EffectsRenderController.renderFrame / ai_plans/03 §8.
       }
 
       let channel = FlutterMethodChannel(name: "com.lumacore/native", binaryMessenger: controller.binaryMessenger)
@@ -38,11 +42,17 @@ import UIKit
           self.handleStartCamera(result: result)
         case "stopCamera":
           self.cameraController.stop()
+          self.effectsController.stop()
           result(nil)
         case "startRecording":
           self.handleStartRecording(result: result)
         case "stopRecording":
           self.handleStopRecording(result: result)
+        case "forceThermalStateForTesting":
+          let args = call.arguments as? [String: Any]
+          let state = args?["state"] as? Int ?? 0
+          self.effectsController.forceThermalStateForTesting(Int32(state))
+          result(nil)
         default:
           result(FlutterMethodNotImplemented)
         }
@@ -59,15 +69,17 @@ import UIKit
       previewTexture.textureId = textures.register(previewTexture)
     }
 
-    cameraController.start { [previewTexture] captureResult in
+    cameraController.start { [previewTexture, effectsController] captureResult in
       DispatchQueue.main.async {
         switch captureResult {
         case .success(let frameSize):
           self.frameSize = frameSize
+          let session = effectsController.start(width: Int(frameSize.width), height: Int(frameSize.height))
           result([
             "textureId": previewTexture.textureId,
             "width": Int(frameSize.width),
             "height": Int(frameSize.height),
+            "sessionId": session,
           ])
         case .failure(let error):
           result(FlutterError(
@@ -90,7 +102,11 @@ import UIKit
       return
     }
 
-    recordingController.start(width: Int(frameSize.width), height: Int(frameSize.height)) { startResult in
+    recordingController.start(
+      session: effectsController.session,
+      width: Int(frameSize.width),
+      height: Int(frameSize.height)
+    ) { startResult in
       DispatchQueue.main.async {
         switch startResult {
         case .success(let url):

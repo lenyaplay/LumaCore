@@ -2,12 +2,13 @@ import AVFoundation
 import Foundation
 import Photos
 
-/// Owns the recording lifecycle: the LumaCore encoder session, its own
-/// serial queue, relative-PTS bookkeeping, and the Documents → Photos handoff
-/// on a successful stop. `encodeQueue` is deliberately separate from
+/// Owns the recording lifecycle: start/stop against a render session it
+/// borrows from `EffectsRenderController`, and the Documents → Photos
+/// handoff on a successful stop. `encodeQueue` is deliberately separate from
 /// `CameraCaptureController`'s `captureQueue` — encoding must never block
 /// frame delivery to the live preview. See
-/// docs/ai_plans/01-ios-ffmpeg-minimal-recording.md §7-8.
+/// docs/ai_plans/01-ios-ffmpeg-minimal-recording.md §7-8,
+/// ai_plans/03-ios-metal-render-pipeline.md §8.
 final class RecordingController {
   enum RecordingError: Error {
     case alreadyRecording
@@ -25,10 +26,13 @@ final class RecordingController {
 
   private var session: Int64 = -1
   private var outputURL: URL?
-  private var firstPts: CMTime?
   private var recording = false
 
-  func start(width: Int, height: Int, completion: @escaping (Result<URL, Error>) -> Void) {
+  /// `session` comes from `EffectsRenderController` — this controller never
+  /// creates or releases it, only borrows it for the duration of a
+  /// recording (see ai_plans/03-ios-metal-render-pipeline.md §8: one render
+  /// session per camera lifecycle, not per recording).
+  func start(session: Int64, width: Int, height: Int, completion: @escaping (Result<URL, Error>) -> Void) {
     encodeQueue.async { [weak self] in
       guard let self else { return }
       guard !self.recording else {
@@ -37,42 +41,22 @@ final class RecordingController {
       }
 
       let url = Self.makeOutputURL()
-      // No Metal/RenderPipeline yet (Этап 4) — this session exists solely to
-      // own the EncoderSession; renderInit's platformSurfaceOrCtx is unused
-      // on this passthrough path.
-      let newSession = self.bridge.renderInit(withContext: nil, width: Int32(width), height: Int32(height))
       let started = self.bridge.startRecording(
-        newSession,
+        session,
         outputPath: url.path,
         bitrateKbps: Self.bitrateKbps,
         width: Int32(width),
         height: Int32(height)
       )
       guard started else {
-        self.bridge.release(newSession)
         completion(.failure(RecordingError.startFailed))
         return
       }
 
-      self.session = newSession
+      self.session = session
       self.outputURL = url
-      self.firstPts = nil
       self.recording = true
       completion(.success(url))
-    }
-  }
-
-  /// Call from `CameraCaptureController.onFrame`. Safe to call whether or not
-  /// a recording is active — a no-op when it isn't.
-  func submitFrame(_ pixelBuffer: CVPixelBuffer, pts: CMTime) {
-    encodeQueue.async { [weak self] in
-      guard let self, self.recording else { return }
-      if self.firstPts == nil {
-        self.firstPts = pts
-      }
-      let relativePts = CMTimeSubtract(pts, self.firstPts!)
-      let ptsUs = Int64((CMTimeGetSeconds(relativePts) * 1_000_000).rounded())
-      self.bridge.submitFrame(self.session, pixelBuffer: pixelBuffer, ptsUs: ptsUs)
     }
   }
 
@@ -85,10 +69,8 @@ final class RecordingController {
       }
       self.recording = false
       let stopped = self.bridge.stopRecording(self.session)
-      self.bridge.release(self.session)
       self.session = -1
       self.outputURL = nil
-      self.firstPts = nil
 
       guard stopped else {
         completion(.failure(RecordingError.stopFailed))

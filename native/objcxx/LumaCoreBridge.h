@@ -17,7 +17,13 @@
             bitrateKbps:(int)bitrateKbps
                   width:(int)width
                  height:(int)height;
-- (void)submitFrame:(int64_t)session pixelBuffer:(CVPixelBufferRef)pixelBuffer ptsUs:(int64_t)ptsUs;
+// Runs pixelBuffer through the full effects pipeline and, if a recording is
+// active, forwards it to the encoder internally (see lumacore_render_frame).
+// Returns the rendered preview frame, or nil if the frame was dropped.
+- (nullable CVPixelBufferRef)renderFrame:(int64_t)session
+                              pixelBuffer:(CVPixelBufferRef)pixelBuffer
+                                    ptsUs:(int64_t)ptsUs CF_RETURNS_RETAINED;
+- (void)setThermalState:(int64_t)session state:(int32_t)state;
 - (BOOL)stopRecording:(int64_t)session;
 
 @end

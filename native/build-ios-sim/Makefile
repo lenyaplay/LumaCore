@@ -153,6 +153,19 @@ lumacore/fast:
 .PHONY : lumacore/fast
 
 #=============================================================================
+# Target rules for targets named lumacore_metallib
+
+# Build rule for target.
+lumacore_metallib: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lumacore_metallib
+.PHONY : lumacore_metallib
+
+# fast build rule for target.
+lumacore_metallib/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_metallib.dir/build.make CMakeFiles/lumacore_metallib.dir/build
+.PHONY : lumacore_metallib/fast
+
+#=============================================================================
 # Target rules for targets named lumacore_tests
 
 # Build rule for target.
@@ -164,6 +177,19 @@ lumacore_tests: cmake_check_build_system
 lumacore_tests/fast:
 	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/lumacore_tests.dir/build.make tests/CMakeFiles/lumacore_tests.dir/build
 .PHONY : lumacore_tests/fast
+
+#=============================================================================
+# Target rules for targets named lumacore_particle_tests
+
+# Build rule for target.
+lumacore_particle_tests: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lumacore_particle_tests
+.PHONY : lumacore_particle_tests
+
+# fast build rule for target.
+lumacore_particle_tests/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/lumacore_particle_tests.dir/build.make tests/CMakeFiles/lumacore_particle_tests.dir/build
+.PHONY : lumacore_particle_tests/fast
 
 objcxx/LumaCoreBridge.o: objcxx/LumaCoreBridge.mm.o
 .PHONY : objcxx/LumaCoreBridge.o
@@ -261,6 +287,30 @@ src/license/TokenValidator.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/src/license/TokenValidator.cpp.s
 .PHONY : src/license/TokenValidator.cpp.s
 
+src/render/PlatformRenderBackendFactory.o: src/render/PlatformRenderBackendFactory.cpp.o
+.PHONY : src/render/PlatformRenderBackendFactory.o
+
+# target to build an object file
+src/render/PlatformRenderBackendFactory.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/src/render/PlatformRenderBackendFactory.cpp.o
+.PHONY : src/render/PlatformRenderBackendFactory.cpp.o
+
+src/render/PlatformRenderBackendFactory.i: src/render/PlatformRenderBackendFactory.cpp.i
+.PHONY : src/render/PlatformRenderBackendFactory.i
+
+# target to preprocess a source file
+src/render/PlatformRenderBackendFactory.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/src/render/PlatformRenderBackendFactory.cpp.i
+.PHONY : src/render/PlatformRenderBackendFactory.cpp.i
+
+src/render/PlatformRenderBackendFactory.s: src/render/PlatformRenderBackendFactory.cpp.s
+.PHONY : src/render/PlatformRenderBackendFactory.s
+
+# target to generate assembly for a file
+src/render/PlatformRenderBackendFactory.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/src/render/PlatformRenderBackendFactory.cpp.s
+.PHONY : src/render/PlatformRenderBackendFactory.cpp.s
+
 src/render/RenderPipeline.o: src/render/RenderPipeline.cpp.o
 .PHONY : src/render/RenderPipeline.o
 
@@ -309,6 +359,30 @@ src/render/metal/MetalRenderBackend.mm.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore.dir/build.make CMakeFiles/lumacore.dir/src/render/metal/MetalRenderBackend.mm.s
 .PHONY : src/render/metal/MetalRenderBackend.mm.s
 
+src/render/particles/ParticleSystem.o: src/render/particles/ParticleSystem.cpp.o
+.PHONY : src/render/particles/ParticleSystem.o
+
+# target to build an object file
+src/render/particles/ParticleSystem.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/src/render/particles/ParticleSystem.cpp.o
+.PHONY : src/render/particles/ParticleSystem.cpp.o
+
+src/render/particles/ParticleSystem.i: src/render/particles/ParticleSystem.cpp.i
+.PHONY : src/render/particles/ParticleSystem.i
+
+# target to preprocess a source file
+src/render/particles/ParticleSystem.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/src/render/particles/ParticleSystem.cpp.i
+.PHONY : src/render/particles/ParticleSystem.cpp.i
+
+src/render/particles/ParticleSystem.s: src/render/particles/ParticleSystem.cpp.s
+.PHONY : src/render/particles/ParticleSystem.s
+
+# target to generate assembly for a file
+src/render/particles/ParticleSystem.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lumacore_logic.dir/build.make CMakeFiles/lumacore_logic.dir/src/render/particles/ParticleSystem.cpp.s
+.PHONY : src/render/particles/ParticleSystem.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -318,8 +392,10 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... test"
+	@echo "... lumacore_metallib"
 	@echo "... lumacore"
 	@echo "... lumacore_logic"
+	@echo "... lumacore_particle_tests"
 	@echo "... lumacore_tests"
 	@echo "... objcxx/LumaCoreBridge.o"
 	@echo "... objcxx/LumaCoreBridge.i"
@@ -333,12 +409,18 @@ help:
 	@echo "... src/license/TokenValidator.o"
 	@echo "... src/license/TokenValidator.i"
 	@echo "... src/license/TokenValidator.s"
+	@echo "... src/render/PlatformRenderBackendFactory.o"
+	@echo "... src/render/PlatformRenderBackendFactory.i"
+	@echo "... src/render/PlatformRenderBackendFactory.s"
 	@echo "... src/render/RenderPipeline.o"
 	@echo "... src/render/RenderPipeline.i"
 	@echo "... src/render/RenderPipeline.s"
 	@echo "... src/render/metal/MetalRenderBackend.o"
 	@echo "... src/render/metal/MetalRenderBackend.i"
 	@echo "... src/render/metal/MetalRenderBackend.s"
+	@echo "... src/render/particles/ParticleSystem.o"
+	@echo "... src/render/particles/ParticleSystem.i"
+	@echo "... src/render/particles/ParticleSystem.s"
 .PHONY : help
 
 

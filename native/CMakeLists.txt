@@ -10,6 +10,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_library(lumacore_logic STATIC
   src/api/lumacore_api.cpp
   src/render/RenderPipeline.cpp
+  src/render/PlatformRenderBackendFactory.cpp
+  src/render/particles/ParticleSystem.cpp
   src/encode/EncoderSession.cpp
   src/license/TokenValidator.cpp
 )
@@ -68,6 +70,51 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
     "-lz"
   )
   target_compile_definitions(lumacore_logic PRIVATE LUMACORE_HAVE_FFMPEG=1)
+
+  # --- Metal shader library (ai_plans/03-ios-metal-render-pipeline.md §4) ----
+  # Per-slice: device and simulator Metal IR are not fat-lib-compatible, same
+  # reason the FFmpeg statics above are per-slice. Each .metal file is
+  # compiled to its own .air (xcrun metal -c does not accept multiple inputs
+  # with a single -o — verified empirically), then metallib links them into
+  # one library. Shared helpers in Common.metal must stay non-`inline` or
+  # metallib's cross-.air linking silently fails to resolve them.
+  if(PLATFORM STREQUAL "OS64")
+    set(LUMACORE_METAL_SDK "iphoneos")
+  else()
+    set(LUMACORE_METAL_SDK "iphonesimulator")
+  endif()
+  set(LUMACORE_METAL_SHADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/render/metal/shaders")
+  set(LUMACORE_METAL_SOURCES
+    "${LUMACORE_METAL_SHADER_DIR}/Common.metal"
+    "${LUMACORE_METAL_SHADER_DIR}/ColorCorrection.metal"
+    "${LUMACORE_METAL_SHADER_DIR}/Vignette.metal"
+    "${LUMACORE_METAL_SHADER_DIR}/Particles.metal"
+  )
+  set(LUMACORE_METAL_HEADERS
+    "${LUMACORE_METAL_SHADER_DIR}/Common.h"
+    "${LUMACORE_METAL_SHADER_DIR}/ShaderTypes.h"
+  )
+  set(LUMACORE_METAL_AIRS "")
+  foreach(LUMACORE_METAL_SRC ${LUMACORE_METAL_SOURCES})
+    get_filename_component(LUMACORE_METAL_NAME "${LUMACORE_METAL_SRC}" NAME_WE)
+    set(LUMACORE_METAL_AIR "${CMAKE_CURRENT_BINARY_DIR}/${LUMACORE_METAL_NAME}.air")
+    add_custom_command(
+      OUTPUT "${LUMACORE_METAL_AIR}"
+      COMMAND xcrun -sdk ${LUMACORE_METAL_SDK} metal -c "${LUMACORE_METAL_SRC}"
+              -I "${LUMACORE_METAL_SHADER_DIR}" -o "${LUMACORE_METAL_AIR}"
+      DEPENDS "${LUMACORE_METAL_SRC}" ${LUMACORE_METAL_HEADERS}
+      COMMENT "Compiling Metal shader ${LUMACORE_METAL_NAME} (${LUMACORE_METAL_SDK})"
+    )
+    list(APPEND LUMACORE_METAL_AIRS "${LUMACORE_METAL_AIR}")
+  endforeach()
+  add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/lumacore.metallib"
+    COMMAND xcrun -sdk ${LUMACORE_METAL_SDK} metallib ${LUMACORE_METAL_AIRS} -o "${CMAKE_CURRENT_BINARY_DIR}/lumacore.metallib"
+    DEPENDS ${LUMACORE_METAL_AIRS}
+    COMMENT "Linking lumacore.metallib (${LUMACORE_METAL_SDK})"
+  )
+  add_custom_target(lumacore_metallib DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/lumacore.metallib")
+  add_dependencies(lumacore lumacore_metallib)
 elseif(WIN32)
   add_definitions(-DLUMACORE_EXPORTS)
   add_library(lumacore SHARED
