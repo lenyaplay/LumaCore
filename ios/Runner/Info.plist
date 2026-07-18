@@ -42,5 +42,7 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>LumaCore uses the camera to show a live preview and record video with real-time effects.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>LumaCore saves your recorded videos to your Photos library.</string>
 </dict>
 </plist>

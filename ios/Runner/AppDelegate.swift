@@ -63,6 +63,7 @@ import UIKit
       DispatchQueue.main.async {
         switch captureResult {
         case .success(let frameSize):
+          self.frameSize = frameSize
           result([
             "textureId": previewTexture.textureId,
             "width": Int(frameSize.width),
@@ -71,6 +72,49 @@ import UIKit
         case .failure(let error):
           result(FlutterError(
             code: "CAMERA_START_FAILED",
+            message: "\(error)",
+            details: nil
+          ))
+        }
+      }
+    }
+  }
+
+  private func handleStartRecording(result: @escaping FlutterResult) {
+    guard let frameSize else {
+      result(FlutterError(
+        code: "CAMERA_NOT_STARTED",
+        message: "startRecording called before startCamera",
+        details: nil
+      ))
+      return
+    }
+
+    recordingController.start(width: Int(frameSize.width), height: Int(frameSize.height)) { startResult in
+      DispatchQueue.main.async {
+        switch startResult {
+        case .success(let url):
+          result(url.path)
+        case .failure(let error):
+          result(FlutterError(
+            code: "RECORDING_START_FAILED",
+            message: "\(error)",
+            details: nil
+          ))
+        }
+      }
+    }
+  }
+
+  private func handleStopRecording(result: @escaping FlutterResult) {
+    recordingController.stop { stopResult in
+      DispatchQueue.main.async {
+        switch stopResult {
+        case .success:
+          result(nil)
+        case .failure(let error):
+          result(FlutterError(
+            code: "RECORDING_STOP_FAILED",
             message: "\(error)",
             details: nil
           ))

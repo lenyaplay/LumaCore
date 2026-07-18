@@ -42,4 +42,21 @@ class NativeChannel {
   static Future<void> stopCamera() async {
     await _channel.invokeMethod('stopCamera');
   }
+
+  /// Starts recording the active camera session to a file, returning its
+  /// path. Throws [PlatformException] if the camera isn't started or the
+  /// encoder fails to initialize.
+  static Future<String> startRecording() async {
+    final result = await _channel.invokeMethod<String>('startRecording');
+    if (result == null) {
+      throw PlatformException(code: 'NO_RESULT', message: 'startRecording returned no result');
+    }
+    return result;
+  }
+
+  /// Stops the active recording. The recorded file is saved to Photos
+  /// natively before this resolves.
+  static Future<void> stopRecording() async {
+    await _channel.invokeMethod('stopRecording');
+  }
 }

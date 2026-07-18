@@ -12,6 +12,7 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   CameraStartResult? _camera;
   String? _error;
+  bool _isRecording = false;
 
   @override
   void initState() {
@@ -35,10 +36,46 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
+  Future<void> _toggleRecording() async {
+    if (_isRecording) {
+      try {
+        await NativeChannel.stopRecording();
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to stop recording: $e')),
+        );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isRecording = false;
+          });
+        }
+      }
+      return;
+    }
+
+    try {
+      await NativeChannel.startRecording();
+      if (!mounted) return;
+      setState(() {
+        _isRecording = true;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to start recording: $e')),
+      );
+    }
+  }
+
   @override
   void dispose() {
     // Fire-and-forget: dispose() can't await, and there's nothing meaningful
-    // to do with a stopCamera failure once the screen is gone.
+    // to do with a stopCamera/stopRecording failure once the screen is gone.
+    if (_isRecording) {
+      NativeChannel.stopRecording().catchError((_) {});
+    }
     NativeChannel.stopCamera().catchError((_) {});
     super.dispose();
   }
@@ -60,10 +97,13 @@ class _CameraScreenState extends State<CameraScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: FloatingActionButton.large(
-              // TODO(Этап 5): lumacore_start_recording / lumacore_stop_recording
-              onPressed: null,
-              backgroundColor: Colors.red,
-              child: const Icon(Icons.fiber_manual_record),
+              onPressed: _camera == null ? null : _toggleRecording,
+              tooltip: _isRecording ? 'Stop Recording' : 'Start Recording',
+              backgroundColor: _isRecording ? Colors.white : Colors.red,
+              child: Icon(
+                _isRecording ? Icons.stop : Icons.fiber_manual_record,
+                color: _isRecording ? Colors.red : null,
+              ),
             ),
           ),
         ),

@@ -28,7 +28,7 @@ final class RecordingController {
   private var firstPts: CMTime?
   private var recording = false
 
-  func start(width: Int, height: Int, completion: @escaping (Result<Void, Error>) -> Void) {
+  func start(width: Int, height: Int, completion: @escaping (Result<URL, Error>) -> Void) {
     encodeQueue.async { [weak self] in
       guard let self else { return }
       guard !self.recording else {
@@ -58,7 +58,7 @@ final class RecordingController {
       self.outputURL = url
       self.firstPts = nil
       self.recording = true
-      completion(.success(()))
+      completion(.success(url))
     }
   }
 
@@ -121,7 +121,7 @@ final class RecordingController {
         return
       }
       PHPhotoLibrary.shared().performChanges({
-        PHAssetCreationRequest.forAsset().addResource(.video, fileURL: url, options: nil)
+        PHAssetCreationRequest.forAsset().addResource(with: .video, fileURL: url, options: nil)
       }, completionHandler: { success, error in
         if success {
           completion(.success(()))
