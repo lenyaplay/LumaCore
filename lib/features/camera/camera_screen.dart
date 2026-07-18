@@ -12,9 +12,8 @@ const int _kEffectVignette = 0x2;
 const int _kEffectParticles = 0x4;
 const int _kEffectSepia = 0x8;
 const int _kEffectEdges = 0x10;
-// Sepia/Edges are opt-in — off by default, unlike the base trio.
-const int _kEffectMaskDefault =
-    _kEffectColorCorrection | _kEffectVignette | _kEffectParticles;
+// All effects are opt-in — off by default, user enables what they want.
+const int _kEffectMaskDefault = 0;
 
 class CameraScreen extends ConsumerStatefulWidget {
   const CameraScreen({super.key});
