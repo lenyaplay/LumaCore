@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # --- Working today (Task.md §6, Этап 0) ---------------------------------
+
+  flutter-analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.38.10"
+          channel: "stable"
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+  native-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S native -B native/build
+      - run: cmake --build native/build
+      - run: ctest --test-dir native/build --output-on-failure
+
+  server-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r server/requirements.txt
+      - run: python -m pytest tests
+        working-directory: server
+
+  # --- Placeholders — real builds land as native/ platform work lands ------
+  # (Task.md §6: android/ios Этапы 2-9, windows Этап 10; ARCHITECTURE.md §4/§5)
+
+  android-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "TODO(Этап 3+) - needs Android NDK + built FFmpeg/liblumacore.so, see tools/ffmpeg/build_android.sh"
+
+  ios-build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "TODO(Этап 3+) - needs Xcode cross-compiled FFmpeg + LumaCoreKit.xcframework, see tools/ffmpeg/build_ios.sh"
+
+  windows-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Windows runners do not ship the Vulkan SDK (unlike NDK/Xcode on their
+      # runners) — explicit install step required, see ARCHITECTURE.md §5.
+      - name: Install Vulkan SDK
+        run: echo "TODO(Этап 10) - install LunarG Vulkan SDK and set VULKAN_SDK, see ARCHITECTURE.md §5"
+      - run: echo "TODO(Этап 10) - needs MSVC-built FFmpeg (h264_mf) + D3D11/Vulkan interop, see tools/ffmpeg/build_windows.ps1"

@@ -1,0 +1,106 @@
+# --- Flutter / Dart ---
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter-versions.yaml
+.pub-cache/
+.pub/
+build/
+*.g.dart.bak
+
+# --- Android ---
+android/.gradle/
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/**/GeneratedPluginRegistrant.java
+**/android/**/*.iml
+**/android/key.properties
+
+# --- iOS / macOS ---
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/App.framework
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/ServiceDefinitions.json
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/**/.generated/
+**/ios/**/Flutter/App.framework
+**/ios/**/Flutter/Flutter.framework
+**/ios/**/Flutter/Flutter.podspec
+**/ios/**/Flutter/Generated.xcconfig
+**/ios/**/Flutter/ephemeral
+**/ios/**/Flutter/app.flx
+**/ios/**/Flutter/app.zip
+**/ios/**/Flutter/flutter_assets/
+**/ios/**/Flutter/flutter_export_environment.sh
+**/ios/**/ServiceDefinitions.json
+**/ios/**/Runner/GeneratedPluginRegistrant.*
+DerivedData/
+*.xcuserstate
+
+# --- Windows (Flutter desktop) ---
+windows/flutter/ephemeral/
+windows/x64/
+**/windows/**/Debug/
+**/windows/**/Release/
+**/windows/**/x64/
+
+# --- native/ (CMake / C++) ---
+native/build/
+native/cmake-build-*/
+native/third_party/ffmpeg_build/
+native/third_party/ffmpeg/*
+!native/third_party/ffmpeg/README.md
+native/src/render/vulkan/shaders/compiled/
+**/*.spv
+CMakeCache.txt
+CMakeFiles/
+CTestTestfile.cmake
+cmake_install.cmake
+compile_commands.json
+
+# --- iOS/xcframework build artifacts ---
+ios/LumaCoreKit.xcframework/
+
+# --- Python (server/) ---
+server/.venv/
+server/**/__pycache__/
+server/**/*.pyc
+.pytest_cache/
+
+# --- IDE ---
+.idea/
+*.iml
+.vscode/
+.metadata
+
+# --- Private planning docs (not for the public repo) ---
+docs/Task.md
+docs/Vacancy.md
+
+# --- General ---
+.DS_Store
+*.log
+*.tmp
+
+# FVM Version Cache
+.fvm/
