@@ -38,8 +38,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
   double _vignetteSoftness = 0.3;
   double _particleIntensity = 0.5;
   double _sepiaAmount = 0.6;
-  double _edgeThreshold = 0.3;
-  double _edgeIntensity = 0.6;
+  double _edgeThreshold = 0.15;
+  double _edgeIntensity = 1.0;
   int _effectMask = _kEffectMaskDefault;
 
   @override

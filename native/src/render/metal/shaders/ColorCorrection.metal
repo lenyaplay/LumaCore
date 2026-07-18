@@ -44,13 +44,19 @@ fragment float4 colorCorrectFS(VSOut in [[stage_in]],
 
     float gx = -tl - 2.0 * ml - bl + tr + 2.0 * mr + br;
     float gy = -tl - 2.0 * tc - tr + bl + 2.0 * bc + br;
-    // Sobel magnitude on [0,1] luma can reach ~5.66 at a hard step edge;
-    // /2.0 is an empirical normalization keeping edgeThreshold usable in [0,1].
-    float edgeMag = saturate(length(float2(gx, gy)) / 2.0);
-    float edge = smoothstep(p.edgeThreshold, p.edgeThreshold + 0.1, edgeMag);
+    // Sobel magnitude on [0,1] luma can reach ~5.66 at a hard synthetic step
+    // edge, but real camera footage has optical/sensor/encode softening —
+    // single-texel gradients across real edges are much smaller than a hard
+    // step, so /0.8 (rather than a literal max-response normalization) keeps
+    // moderate real-world edges reachable at a usable edgeThreshold.
+    float edgeMag = saturate(length(float2(gx, gy)) / 0.8);
+    float edge = smoothstep(p.edgeThreshold, p.edgeThreshold + 0.06, edgeMag);
 
+    // Posterized image directly as the "comic" base — a heavy flat-white
+    // wash here (as an earlier version did) reads as "nothing changed"
+    // rather than a graphic look; only a slight lift keeps it paper-like.
     float3 posterized = floor(rgb * 4.0 + 0.5) / 4.0;
-    float3 paper = mix(float3(0.95), posterized, 0.6);
+    float3 paper = mix(posterized, float3(1.0), 0.15);
     float3 comic = mix(paper, float3(0.0), edge);
     rgb = mix(rgb, comic, p.edgeIntensity);
   }
