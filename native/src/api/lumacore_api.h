@@ -76,6 +76,24 @@ LUMACORE_API int32_t lumacore_validate_license(const char* tokenBlobJson, const 
 LUMACORE_API int32_t lumacore_submit_audio_frame(int64_t session, const void* pcmData, int32_t numFrames,
                                                   int32_t sampleRate, int32_t numChannels, int64_t ptsUs);
 
+#if defined(__ANDROID__)
+// Returns the GL_TEXTURE_EXTERNAL_OES texture name the camera must write
+// into via Kotlin's `SurfaceTexture(textureId)` — the Android push-model
+// counterpart to iOS passing a CVPixelBufferRef into lumacore_render_frame
+// directly (see ai_plans/04-android-camerax-gl-pipeline.md §A.3). -1 if
+// session is invalid. Android-only: there is nothing to expose here on
+// platforms whose backend doesn't own an externally-fed GL texture.
+LUMACORE_API int32_t lumacore_get_camera_texture_id(int64_t session);
+
+// Forwards SurfaceTexture.getTransformMatrix()'s 4x4 column-major matrix
+// (exactly 16 floats) — must be refreshed every frame, right after
+// updateTexImage(), before the corresponding lumacore_render_frame call.
+// Without it, the color-correction shader samples the sensor's native
+// buffer layout, which is rotated/mirrored relative to what should be
+// displayed. No-op if session is invalid.
+LUMACORE_API void lumacore_set_camera_transform(int64_t session, const float* matrix16);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

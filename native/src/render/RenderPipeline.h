@@ -27,6 +27,13 @@ class RenderPipeline {
   LumaStats getStats() const;
   void shutdown();
 
+  // Escape hatch for platform-specific queries that don't belong on the
+  // shared IRenderBackend interface (e.g. Android's GLRenderBackend::
+  // cameraTextureId() — see lumacore_get_camera_texture_id in
+  // lumacore_api.cpp). Callers must know and static_cast to the concrete
+  // backend type themselves; RenderPipeline stays backend-agnostic.
+  IRenderBackend* rawBackend() const { return backend_.get(); }
+
  private:
   std::unique_ptr<IRenderBackend> backend_;
   EffectParamsBlock currentParams_{};

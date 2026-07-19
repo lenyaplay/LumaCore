@@ -13,6 +13,8 @@
 #endif
 #if defined(__APPLE__) && TARGET_OS_IPHONE
 #include <CoreVideo/CoreVideo.h>
+#elif defined(__ANDROID__)
+#include "render/gl/GLRenderBackend.h"
 #endif
 
 namespace {
@@ -33,11 +35,21 @@ double monotonicSeconds() {
 }
 
 // exportForEncoder() hands back a +1 owned platform image (CVPixelBufferRef
-// on iOS); EncoderSession::submitFrame only reads it, so the caller here
-// must release it. void* on non-Apple platforms carries nothing to release.
+// on iOS, heap-allocated NativeNV12Buffer+backing bytes on Android);
+// EncoderSession::submitFrame only reads it, so the caller here must release
+// it. void* on other platforms carries nothing to release.
 void releaseEncoderExport(void* handle) {
 #if defined(__APPLE__) && TARGET_OS_IPHONE
   if (handle) CVPixelBufferRelease(static_cast<CVPixelBufferRef>(handle));
+#elif defined(__ANDROID__)
+  if (handle) {
+    // Matches GLRenderBackend::exportForEncoder()'s allocation: one
+    // NativeNV12Buffer plus one contiguous backing buffer its yPlane points
+    // into (uvPlane points into the same allocation, see that function).
+    auto* buf = static_cast<lumacore::encode::NativeNV12Buffer*>(handle);
+    delete[] buf->yPlane;
+    delete buf;
+  }
 #else
   (void)handle;
 #endif
@@ -135,6 +147,26 @@ int32_t lumacore_submit_audio_frame(int64_t session, const void* pcmData, int32_
   s.encoder.submitAudioFrame(pcmData, numFrames, sampleRate, numChannels, ptsUs);
   return 0;
 }
+
+#if defined(__ANDROID__)
+int32_t lumacore_get_camera_texture_id(int64_t session) {
+  auto it = g_sessions.find(session);
+  if (it == g_sessions.end()) return -1;
+  // Safe: on Android, createPlatformRenderBackend() (PlatformRenderBackendFactory.cpp)
+  // always returns a gl::GLRenderBackend — this is the one platform this
+  // symbol is even compiled for.
+  auto* backend = static_cast<lumacore::render::gl::GLRenderBackend*>(it->second.pipeline.rawBackend());
+  if (!backend) return -1;
+  return static_cast<int32_t>(backend->cameraTextureId());
+}
+
+void lumacore_set_camera_transform(int64_t session, const float* matrix16) {
+  auto it = g_sessions.find(session);
+  if (it == g_sessions.end() || !matrix16) return;
+  auto* backend = static_cast<lumacore::render::gl::GLRenderBackend*>(it->second.pipeline.rawBackend());
+  if (backend) backend->setCameraTransform(matrix16);
+}
+#endif
 
 int32_t lumacore_validate_license(const char* tokenBlobJson, const char* deviceFingerprint) {
   if (!tokenBlobJson || !deviceFingerprint) {

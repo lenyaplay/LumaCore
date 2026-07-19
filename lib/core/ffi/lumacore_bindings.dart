@@ -1,8 +1,21 @@
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 
 import 'lumacore_bindings_generated.dart';
+
+// DynamicLibrary.process() only sees symbols already loaded into the current
+// process image, which is how iOS's static-linked-into-the-app-binary lumacore
+// works. Android's lumacore is a separate liblumacore.so (dlopen'd via
+// System.loadLibrary from LumaCoreBridge.kt's companion init) — its symbols
+// are not visible through DynamicLibrary.process(), so it needs an explicit
+// DynamicLibrary.open() by soname instead (see
+// ai_plans/04-android-camerax-gl-pipeline.md context section).
+DynamicLibrary _openLumacoreLibrary() {
+  if (Platform.isAndroid) return DynamicLibrary.open('liblumacore.so');
+  return DynamicLibrary.process();
+}
 
 /// Dart-side mirror of the C `LumaEffectParams` struct.
 class LumaEffectParamsDart {
@@ -48,10 +61,11 @@ class LumaStatsDart {
 
 /// Thin wrapper over the ffigen-generated bindings. Only the two
 /// high-frequency calls the effects UI needs are exposed here — session
-/// lifecycle, per-frame rendering, and recording control stay Obj-C++/Swift
-/// only and never go through dart:ffi (ARCHITECTURE.md §3).
+/// lifecycle, per-frame rendering, and recording control stay
+/// Obj-C++/Swift (iOS) or JNI/Kotlin (Android) only and never go through
+/// dart:ffi (ARCHITECTURE.md §3).
 class LumaCoreBindings {
-  LumaCoreBindings._() : _bindings = LumaCoreBindingsGenerated(DynamicLibrary.process());
+  LumaCoreBindings._() : _bindings = LumaCoreBindingsGenerated(_openLumacoreLibrary());
 
   static final instance = LumaCoreBindings._();
 
@@ -92,8 +106,3 @@ class LumaCoreBindings {
     }
   }
 }
-
-// DynamicLibrary.process() is statically linked into the binary on iOS, not
-// a separate .dylib. The project is iOS-only right now — a
-// Platform.isAndroid ? DynamicLibrary.open(...) : DynamicLibrary.process()
-// branch is deliberately not added until Android support lands.

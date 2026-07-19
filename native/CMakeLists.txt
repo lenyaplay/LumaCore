@@ -43,12 +43,38 @@ add_subdirectory(tests)
 # state until the Android NDK / ios-cmake / MSVC+Vulkan toolchains land.
 
 if(ANDROID)
+  if(NOT CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a")
+    message(FATAL_ERROR "Only arm64-v8a is supported (see ai_plans/04-android-camerax-gl-pipeline.md) — got '${CMAKE_ANDROID_ARCH_ABI}'.")
+  endif()
+
   add_library(lumacore SHARED
     src/render/gl/GLRenderBackend.cpp
     jni/lumacore_jni.cpp
   )
   target_link_libraries(lumacore PRIVATE lumacore_logic)
-  target_link_libraries(lumacore PRIVATE GLESv3 EGL log)
+  target_link_libraries(lumacore PRIVATE GLESv3 EGL android log)
+
+  # --- FFmpeg write-path statics (MediaCodec H.264 encode, mp4 mux) ---------
+  # Built by tools/ffmpeg/build_android.sh into one arm64-v8a slice dir. See
+  # docs/ai_plans/04-android-camerax-gl-pipeline.md §A.2.
+  set(LUMACORE_FFMPEG_ANDROID_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/ffmpeg_build/android/arm64-v8a")
+  if(NOT EXISTS "${LUMACORE_FFMPEG_ANDROID_DIR}/lib/libavcodec.a")
+    message(FATAL_ERROR "FFmpeg Android build not found at ${LUMACORE_FFMPEG_ANDROID_DIR} — run tools/ffmpeg/build_android.sh first.")
+  endif()
+
+  target_include_directories(lumacore_logic PRIVATE "${LUMACORE_FFMPEG_ANDROID_DIR}/include")
+  target_link_libraries(lumacore_logic PRIVATE
+    "${LUMACORE_FFMPEG_ANDROID_DIR}/lib/libavformat.a"
+    "${LUMACORE_FFMPEG_ANDROID_DIR}/lib/libavcodec.a"
+    "${LUMACORE_FFMPEG_ANDROID_DIR}/lib/libswscale.a"
+    "${LUMACORE_FFMPEG_ANDROID_DIR}/lib/libswresample.a"
+    "${LUMACORE_FFMPEG_ANDROID_DIR}/lib/libavutil.a"
+  )
+  target_compile_definitions(lumacore_logic PRIVATE LUMACORE_HAVE_FFMPEG=1)
+  # h264_mediacodec/--enable-jni pull in NDK's MediaCodec JNI glue at link
+  # time; libavformat's id3v2 tag path calls zlib's uncompress() (z is an
+  # NDK system lib, no vendoring needed, same as -lz on the iOS branch).
+  target_link_libraries(lumacore PRIVATE mediandk z)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
   add_library(lumacore STATIC
     src/render/metal/MetalRenderBackend.mm

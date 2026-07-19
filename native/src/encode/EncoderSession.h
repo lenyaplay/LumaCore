@@ -1,10 +1,27 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <string>
 
 namespace lumacore::encode {
+
+// Platform-agnostic CPU NV12 descriptor — the Android counterpart to a
+// CVPixelBufferRef (see submitFrame's #if defined(__APPLE__)/#elif
+// defined(__ANDROID__) branches in EncoderSession.cpp). yPlane/uvPlane point
+// into a single heap buffer GLRenderBackend::exportForEncoder() allocates via
+// glReadPixels; uvPlane is interleaved CbCr, matching NV12. Ownership: the
+// allocating side (GLRenderBackend) owns the memory; submitFrame() only
+// reads it, release happens in lumacore_api.cpp's releaseEncoderExport().
+struct NativeNV12Buffer {
+  const uint8_t* yPlane;
+  size_t yStride;
+  const uint8_t* uvPlane;
+  size_t uvStride;
+  int width;
+  int height;
+};
 
 // Wraps avcodec/avformat mux + hardware encoder glue (mediacodec/videotoolbox/mf).
 // One session per recording; start/stop mirror lumacore_start_recording /
