@@ -87,10 +87,12 @@ docs/ai_plans/              пошаговые планы по каждому к
 
 ## Как устроен эффект комикса
 
-Эффект на демо-видео (см. корневой [README](../README.md#демо)) — не отдельный шейдер,
-а одна ветка внутри общего прохода цветокоррекции
-(`native/src/render/gl/shaders/ShaderSources.h`, `kColorCorrectFragmentSource`,
-`effectMask & 0x10`; 1:1 порт `ColorCorrection.metal` с iOS). Шесть шагов на пиксель:
+Эффект на демо-видео (снято на iPhone, см. корневой [README](../README.md)) — не
+отдельный шейдер, а одна ветка внутри общего прохода цветокоррекции: на iOS —
+`native/src/render/metal/shaders/ColorCorrection.metal` (Metal Shading Language), на
+Android — 1:1 порт в `native/src/render/gl/shaders/ShaderSources.h`
+(`kColorCorrectFragmentSource`, GLSL ES). Математика идентична на обеих платформах,
+включена по биту `effectMask & 0x10`. Шесть шагов на пиксель:
 
 1. **Sobel-градиент по яркости.** Берутся 8 соседних тапов (3×3 без центра: `tl/tc/tr/
    ml/mr/bl/bc/br`). Яркость каждого — `dot(rgb, vec3(0.299, 0.587, 0.114))` (на Android
