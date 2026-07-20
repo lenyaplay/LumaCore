@@ -1,6 +1,6 @@
 # native/cmake/
 
-Toolchain files vendored here on Этап 2/3 (Task.md §6):
+Toolchain files vendored here for Android/iOS native builds:
 
 - `android.toolchain.cmake` — comes with the Android NDK, referenced via
   `-DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake`.
