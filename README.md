@@ -1,11 +1,11 @@
 # LumaCore
 
-### 🎬 [Демо-видео](media/demo-comic-effect.mp4)
+<video src="https://gist.github.com/user-attachments/assets/de471a15-0e73-4e86-966d-74363363f4a9" controls width="360"></video>
 
-Запись с реального устройства (Android, MediaTek/Mali): живое превью с GPU-эффектом
+Запись с реального устройства (iPhone): живое превью с GPU-эффектом
 «комикс» (Sobel edge-detection + постеризация в одном фрагментном шейдере — разбор
 математики в [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md#как-устроен-эффект-комикса)) и
-запись видео со звуком в MP4 (H.264 + AAC) через FFmpeg/MediaCodec.
+запись видео со звуком в MP4 (H.264 + AAC) через FFmpeg/VideoToolbox.
 
 Приложение камеры с real-time GPU-фильтрами и записью видео — Flutter UI поверх общего
 C++ ядра (FFmpeg, GPU-рендеринг, лицензирование) на Android, iOS и Windows. Инженерные
