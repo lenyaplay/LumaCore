@@ -1,6 +1,6 @@
 # LumaCore
 
-<video src="media/demo-comic-effect.mp4" controls width="360"></video>
+### 🎬 [Демо-видео](media/demo-comic-effect.mp4)
 
 Запись с реального устройства (Android, MediaTek/Mali): живое превью с GPU-эффектом
 «комикс» (Sobel edge-detection + постеризация в одном фрагментном шейдере — разбор
