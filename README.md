@@ -3,11 +3,23 @@
 Портфолио-приложение камеры с real-time GPU-фильтрами и записью видео —
 Flutter UI поверх общего C++ ядра (FFmpeg, GPU-рендеринг, лицензирование) на
 Android, iOS и Windows. Полная мотивация и детальный roadmap — [Task.md](docs/Task.md),
-инженерные решения и риски — [ARCHITECTURE.md](docs/ARCHITECTURE.md).
+инженерные решения и риски — [ARCHITECTURE.md](docs/ARCHITECTURE.md), практический гайд
+«как собрать и запустить» — [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
-**Статус: скелет репозитория** (Task.md §6, Этап 0–1). Camera capture, GPU-шейдеры,
-сборка FFmpeg и офлайн-валидация лицензии — TODO на последующих этапах; сейчас
-собирается и проходит тесты только pure-logic слой (см. «Что уже работает» ниже).
+## Демо
+
+<video src="media/demo-comic-effect.mp4" controls width="360"></video>
+
+Запись с реального устройства (Android, MediaTek/Mali): живое превью с GPU-эффектом
+«комикс» (Sobel edge-detection + постеризация в одном фрагментном шейдере — разбор
+математики в [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md#как-устроен-эффект-комикса)) и
+запись видео со звуком в MP4 (H.264 + AAC) через FFmpeg/MediaCodec.
+
+**Статус**: Android- и iOS-пайплайны (захват камеры, 3-проходный GPU-рендер, запись
+со звуком, офлайн-лицензирование) реализованы и проверены на реальных устройствах —
+не только собираются, но и подтверждённо работают (см. `docs/ai_plans/04-05` про
+конкретные баги, найденные и исправленные при отладке на устройстве). Windows
+(Vulkan-бэкенд) — не начат, см. Task.md §6 «Этап 10».
 
 ## Соответствие требованиям вакансии
 
@@ -45,10 +57,17 @@ docs/       архитектурная схема, профилирование,
   cmake -S native -B native/build && cmake --build native/build
   ctest --test-dir native/build --output-on-failure
   ```
-  Платформенные GPU-бэкенды (GL/Metal/Vulkan) — заголовки + заглушки,
-  подключаются в сборку только под соответствующим тулчейном (Этап 2–4, 10).
+  Платформенные GPU-бэкенды — `GLRenderBackend` (Android, OpenGL ES 3.0) и
+  `MetalRenderBackend` (iOS) реализованы полностью и проверены на устройстве
+  (захват камеры → 3-проходный шейдер → превью + запись). `VulkanRenderBackend`
+  (Windows) — заголовок + заглушка, Этап 10.
 
-- **`lib/`** — Flutter-скелет с навигацией license → camera → gallery → settings
+- **`android/` + `ios/`** — CameraX/GL (Android) и AVFoundation/Metal (iOS) пайплайны:
+  живое превью с эффектами (цветокоррекция, сепия, комикс/edge-detection, виньетка,
+  частицы), запись видео+звука в MP4 через FFmpeg (`h264_mediacodec`/`h264_videotoolbox`
+  + AAC), офлайн-валидация лицензии. Как собрать/запустить — [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+
+- **`lib/`** — Flutter UI: license → camera → gallery → settings
   (Riverpod + go_router). Требует [FVM](https://fvm.app) с Flutter 3.38.10
   (см. `.fvmrc`):
   ```
@@ -59,10 +78,9 @@ docs/       архитектурная схема, профилирование,
 
 - **`server/`** — mock-бэкенд лицензий, реальная Ed25519-подпись/верификация:
   ```
-  cd server
-  python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-  .venv/bin/python -m pytest tests
+  cd server && ./run.sh
   ```
+  (см. [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) про подключение с физического устройства).
 
 ## Roadmap
 
